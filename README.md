@@ -2,6 +2,11 @@
 
 WasteTags is a web application for generating chemical waste labels with embedded QR codes. It allows users to input chemical information, generates a unique waste tag, and produces a label that can be printed and attached to waste containers. The application uses a SQLite database to retrieve chemical component data and generates QR codes containing waste information for easy scanning and tracking.
 
+## Future Development Ideas
+
+- Investigate using [WAILS](https://wails.io/) for the front end. Can be dockerized & build Windows, macOS, and Linux desktop apps & allows for Go backend
+-
+
 ## Table of Contents
 
 - [Features](#features)
