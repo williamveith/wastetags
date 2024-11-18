@@ -2,11 +2,13 @@ package main
 
 import (
 	"embed"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"html/template"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/williamveith/wastetags/pkg/database"
 	"github.com/williamveith/wastetags/pkg/qrcodegen"
@@ -44,6 +46,13 @@ func generateQRCodeBase64(dataDict map[string]interface{}) string {
 	return dataURI
 }
 
+func generateShortUUID(length int) string {
+	rawUUID := uuid.New()
+	base64Encoded := base64.StdEncoding.EncodeToString(rawUUID[:])
+	base64Clean := strings.NewReplacer("+", "", "/", "", "=", "").Replace(base64Encoded)
+	return base64Clean[:length]
+}
+
 func wasteLabelForm(c *gin.Context) {
 	if c.Request.Method == http.MethodPost {
 		values := map[string]string{
@@ -58,7 +67,7 @@ func wasteLabelForm(c *gin.Context) {
 			"physState": c.PostForm("physState"),
 		}
 
-		wasteTag := uuid.New().String()
+		wasteTag := generateShortUUID(20)
 		components, err := chemicals.GetRowsByName(values["chemName"])
 		if err != nil {
 			fmt.Println("Error retrieving components:", err)
