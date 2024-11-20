@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
-	"log"
 	"net/http"
 	"strings"
 
@@ -23,26 +22,12 @@ var embeddedTemplatesFS embed.FS
 var chemicals *database.ChemicalDatabase
 
 func init() {
-	var err error
-	chemicals, err = database.NewChemicalDatabase("data/chemicals.sqlite3")
-	if err != nil {
-		log.Fatalf("Failed to initialize database: %v", err)
-	}
+	chemicals = database.NewChemicalDatabase("data/chemicals.sqlite3")
 }
 
 func generateQRCodeBase64(dataDict map[string]interface{}) string {
-	jsonContent, err := json.Marshal(dataDict)
-	if err != nil {
-		fmt.Println("Error marshaling JSON:", err)
-		return ""
-	}
-
-	dataURI, err := qrcodegen.DataURI(string(jsonContent))
-	if err != nil {
-		fmt.Println("Error generating QR code:", err)
-		return ""
-	}
-
+	jsonContent, _ := json.Marshal(dataDict)
+	dataURI := qrcodegen.DataURI(string(jsonContent), nil)
 	return dataURI
 }
 
@@ -108,10 +93,7 @@ func wasteLabelForm(c *gin.Context) {
 func runLabelMaker() {
 	gin.SetMode(gin.ReleaseMode)
 
-	tmpl, err := template.ParseFS(embeddedTemplatesFS, "templates/*")
-	if err != nil {
-		log.Fatalf("Failed to parse embedded templates: %v", err)
-	}
+	tmpl, _ := template.ParseFS(embeddedTemplatesFS, "templates/*")
 
 	r := gin.Default()
 	r.SetHTMLTemplate(tmpl)

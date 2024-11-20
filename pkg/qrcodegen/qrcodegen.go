@@ -10,7 +10,7 @@ import (
 	"github.com/skip2/go-qrcode"
 )
 
-var configs = QRCodeSettings{
+var defaultConfigs = &QRCodeSettings{
 	Size:            256,
 	RecoveryLevel:   qrcode.Medium,
 	DisableBorder:   true,
@@ -26,73 +26,83 @@ type QRCodeSettings struct {
 	ForegroundColor color.Color
 }
 
-func generateQRCode(content string) (*qrcode.QRCode, error) {
-	qrCode, err := qrcode.New(content, configs.RecoveryLevel)
-	if err != nil {
-		return nil, err
-	}
+func generateQRCode(content string, settings *QRCodeSettings) (*qrcode.QRCode, error) {
+	settings = applyDefaults(settings)
+	qrCode, err := qrcode.New(content, settings.RecoveryLevel)
+	qrCode.DisableBorder = settings.DisableBorder
+	qrCode.BackgroundColor = settings.BackgroundColor
+	qrCode.ForegroundColor = settings.ForegroundColor
 
-	qrCode.DisableBorder = configs.DisableBorder
-	qrCode.BackgroundColor = configs.BackgroundColor
-	qrCode.ForegroundColor = configs.ForegroundColor
-
-	return qrCode, nil
+	return qrCode, wrapError(err, "failed to generate QR code")
 }
 
-func Image(content string) ([]byte, error) {
-	qrCode, err := generateQRCode(content)
-	if err != nil {
-		return nil, err
+func applyDefaults(settings *QRCodeSettings) *QRCodeSettings {
+	if settings == nil {
+		return defaultConfigs
 	}
+	return settings
+}
 
+func wrapError(err error, message string) error {
+	if err != nil {
+		return fmt.Errorf("%s: %w", message, err)
+	}
+	return nil
+}
+
+func normalizeColorComponent(component uint32) float64 {
+	return float64(component) / 255.0
+}
+
+func GetMostContrastingColor(providedColor color.Color) color.Color {
+	r, g, b, _ := providedColor.RGBA()
+	red := normalizeColorComponent(r)
+	green := normalizeColorComponent(g)
+	blue := normalizeColorComponent(b)
+
+	luminance := 0.299*red + 0.587*green + 0.114*blue
+
+	if luminance > 0.5 {
+		return color.Black
+	}
+	return color.White
+}
+
+func Image(content string, settings *QRCodeSettings) []byte {
+	settings = applyDefaults(settings)
+	qrCode, _ := generateQRCode(content, settings)
 	var buffer bytes.Buffer
-	err = qrCode.Write(configs.Size, &buffer)
-	if err != nil {
-		return nil, err
-	}
+	qrCode.Write(settings.Size, &buffer)
 
-	return buffer.Bytes(), nil
+	return buffer.Bytes()
 }
 
-func ImageFile(content, fileName string) error {
-	imageBytes, err := Image(content)
-	if err != nil {
-		return err
-	}
-
+func ImageFile(content, fileName string, settings *QRCodeSettings) error {
+	settings = applyDefaults(settings)
+	imageBytes := Image(content, settings)
 	return os.WriteFile(fileName, imageBytes, 0644)
 }
 
-func Base64(content string) (string, error) {
-	imageBytes, err := Image(content)
-	if err != nil {
-		return "", err
-	}
-	return base64.StdEncoding.EncodeToString(imageBytes), err
+func Base64(content string, settings *QRCodeSettings) string {
+	settings = applyDefaults(settings)
+	imageBytes := Image(content, settings)
+	return base64.StdEncoding.EncodeToString(imageBytes)
 }
 
-func DataURI(content string) (string, error) {
-	base64String, err := Base64(content)
-	if err != nil {
-		return "", err
-	}
-	return fmt.Sprintf("data:image/png;base64,%s", base64String), err
+func DataURI(content string, settings *QRCodeSettings) string {
+	settings = applyDefaults(settings)
+	base64String := Base64(content, settings)
+	return fmt.Sprintf("data:image/png;base64,%s", base64String)
 }
 
-func SVG(content string) (string, error) {
-	qrCode, err := generateQRCode(content)
-	if err != nil {
-		return "", err
-	}
-
-	return qrCode.ToSmallString(true), nil
+func SVG(content string, settings *QRCodeSettings) string {
+	settings = applyDefaults(settings)
+	qrCode, _ := generateQRCode(content, settings)
+	return qrCode.ToSmallString(true)
 }
 
-func SVGFile(content, fileName string) error {
-	svgString, err := SVG(content)
-	if err != nil {
-		return err
-	}
-
+func SVGFile(content, fileName string, settings *QRCodeSettings) error {
+	settings = applyDefaults(settings)
+	svgString := SVG(content, settings)
 	return os.WriteFile(fileName, []byte(svgString), 0644)
 }
