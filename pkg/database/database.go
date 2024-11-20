@@ -13,27 +13,17 @@ type ChemicalDatabase struct {
 	lock   sync.Mutex
 }
 
-func NewChemicalDatabase(dbName string) (*ChemicalDatabase, error) {
-	if dbName == "" {
-		dbName = "data/chemicals.sqlite3"
-	}
-
-	db, err := sql.Open("sqlite3", dbName)
-	if err != nil {
-		return nil, err
-	}
+func NewChemicalDatabase(dbName string) *ChemicalDatabase {
+	db, _ := sql.Open("sqlite3", dbName)
 
 	cdb := &ChemicalDatabase{
 		dbName: dbName,
 		db:     db,
 	}
 
-	err = cdb.createTable()
-	if err != nil {
-		return nil, err
-	}
+	cdb.createTable()
 
-	return cdb, nil
+	return cdb
 }
 
 func (cdb *ChemicalDatabase) createTable() error {
