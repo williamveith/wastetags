@@ -10,7 +10,7 @@ DOCKER_COMPOSE_FILE := $(DOCKER_COMPOSE_DIR)/docker-compose.yml
 all: build
 
 # Build the binary
-build:
+build: clean
 	@echo "Building the project..."
 	@mkdir -p $(BINARY_DIR)
 	@go build -ldflags="-s -w" -o $(BINARY_PATH) $(CMD_DIR)/main.go

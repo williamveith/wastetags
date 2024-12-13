@@ -2,71 +2,70 @@ package database
 
 import (
 	"database/sql"
+	"fmt"
+	"log"
 	"sync"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
-type ChemicalDatabase struct {
+type Database struct {
 	dbName string
+	schema string
 	db     *sql.DB
 	lock   sync.Mutex
 }
 
-func NewChemicalDatabase(dbName string) *ChemicalDatabase {
-	db, _ := sql.Open("sqlite3", dbName)
-
-	cdb := &ChemicalDatabase{
-		dbName: dbName,
-		db:     db,
+func NewDatabase(dbName string, schema []byte) *Database {
+	db, err := sql.Open("sqlite3", dbName)
+	if err != nil {
+		log.Fatalf("Failed to open SQLite database: %v", err)
 	}
 
-	cdb.createTable()
+	// Execute the schema
+	_, err = db.Exec(string(schema))
+	if err != nil {
+		log.Fatalf("Failed to initialize database schema: %v", err)
+	}
 
-	return cdb
+	return &Database{
+		dbName: dbName,
+		schema: string(schema),
+		db:     db,
+	}
 }
 
-func (cdb *ChemicalDatabase) createTable() error {
+func (cdb *Database) InsertData(tableName, sqlStatement []byte, datavalues map[string][]map[string]string) error {
 	cdb.lock.Lock()
 	defer cdb.lock.Unlock()
 
-	_, err := cdb.db.Exec(`
-		CREATE TABLE IF NOT EXISTS chemicals (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			chem_name TEXT,
-			component_name TEXT,
-			cas TEXT,
-			percent TEXT,
-			component_order INTEGER
-		)
-	`)
-	return err
-}
+	queryTemplate := string(sqlStatement)
 
-func (cdb *ChemicalDatabase) InsertData(datavalues map[string][]map[string]string) error {
-	cdb.lock.Lock()
-	defer cdb.lock.Unlock()
+	query := fmt.Sprintf(queryTemplate, tableName)
 
 	tx, err := cdb.db.Begin()
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to begin transaction: %w", err)
 	}
 	defer tx.Rollback()
 
-	stmt, err := tx.Prepare(`
-		INSERT INTO chemicals (chem_name, component_name, cas, percent, component_order)
-		VALUES (?, ?, ?, ?, ?)
-	`)
+	stmt, err := tx.Prepare(query)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to prepare statement: %w", err)
 	}
 	defer stmt.Close()
 
-	for chemName, components := range datavalues {
-		for order, component := range components {
-			_, err := stmt.Exec(chemName, component["Name"], component["CAS"], component["Percent"], order)
-			if err != nil {
-				return err
+	// Iterate over datavalues to insert rows
+	for key, rows := range datavalues {
+		for index, row := range rows {
+			params := []interface{}{key}
+			for _, value := range row {
+				params = append(params, value)
+			}
+			params = append(params, index)
+
+			if _, err := stmt.Exec(params...); err != nil {
+				return fmt.Errorf("failed to execute statement: %w", err)
 			}
 		}
 	}
@@ -74,16 +73,52 @@ func (cdb *ChemicalDatabase) InsertData(datavalues map[string][]map[string]strin
 	return tx.Commit()
 }
 
-func (cdb *ChemicalDatabase) GetRowsByName(chemName string) ([]map[string]interface{}, error) {
+func (cdb *Database) GetColumnValues(tableName string, sqlStatement []byte, columnName string) ([]map[string]interface{}, error) {
 	cdb.lock.Lock()
 	defer cdb.lock.Unlock()
 
-	rows, err := cdb.db.Query("SELECT * FROM chemicals WHERE chem_name = ?", chemName)
+	queryTemplate := string(sqlStatement)
+
+	query := fmt.Sprintf(queryTemplate, columnName, tableName)
+
+	rows, err := cdb.db.Query(query)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
+	result, err := SqlRowsToArray(rows)
+
+	return result, err
+}
+
+func (cdb *Database) GetRowsByColumnValue(tableName string, sqlStatement []byte, columnName string, searchValue string) ([]map[string]interface{}, error) {
+	cdb.lock.Lock()
+	defer cdb.lock.Unlock()
+
+	queryTemplate := string(sqlStatement)
+
+	query := fmt.Sprintf(queryTemplate, tableName, columnName)
+
+	rows, err := cdb.db.Query(query, searchValue)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	result, err := SqlRowsToArray(rows)
+
+	return result, err
+}
+
+func (cdb *Database) Close() error {
+	cdb.lock.Lock()
+	defer cdb.lock.Unlock()
+
+	return cdb.db.Close()
+}
+
+func SqlRowsToArray(rows *sql.Rows) ([]map[string]interface{}, error) {
 	columns, err := rows.Columns()
 	if err != nil {
 		return nil, err
@@ -105,17 +140,9 @@ func (cdb *ChemicalDatabase) GetRowsByName(chemName string) ([]map[string]interf
 
 		row := make(map[string]interface{})
 		for i, column := range columns {
-			row[column] = values[i]
+			row[column] = values[i] // Ensure column names are strings
 		}
 		result = append(result, row)
 	}
-
-	return result, nil
-}
-
-func (cdb *ChemicalDatabase) Close() error {
-	cdb.lock.Lock()
-	defer cdb.lock.Unlock()
-
-	return cdb.db.Close()
+	return result, rows.Err()
 }
