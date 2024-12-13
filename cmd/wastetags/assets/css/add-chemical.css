@@ -1,0 +1,41 @@
+:root {
+  --cas-height: 20px;
+  --cas-width: 700px;
+  --corner-rounding: 3px;
+}
+
+.content-div {
+  display: flex;
+  justify-content: flex-start;
+  align-content: center;
+  flex-wrap: wrap;
+  border-radius: var(--corner-rounding);
+  height: var(--cas-height);
+  width: var(--cas-width);
+  padding: 10px 4px;
+  border: 0px;
+  background-color: white;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+label {
+    text-align: center;
+}
+
+input {
+  height: var(--cas-height);
+}
+
+input {
+    border-width: 0px 0px 1px 0px;
+    border-bottom: solid black;
+}
+
+#chemical-name {
+    width: 550px;
+}
+
+.cas {
+    text-align: center;
+}

@@ -35,7 +35,7 @@ func NewDatabase(dbName string, schema []byte) *Database {
 	}
 }
 
-func (cdb *Database) InsertData(tableName, sqlStatement []byte, datavalues map[string][]map[string]string) error {
+func (cdb *Database) InsertData(tableName string, sqlStatement []byte, datavalues [][]string) error {
 	cdb.lock.Lock()
 	defer cdb.lock.Unlock()
 
@@ -55,18 +55,15 @@ func (cdb *Database) InsertData(tableName, sqlStatement []byte, datavalues map[s
 	}
 	defer stmt.Close()
 
-	// Iterate over datavalues to insert rows
-	for key, rows := range datavalues {
-		for index, row := range rows {
-			params := []interface{}{key}
-			for _, value := range row {
-				params = append(params, value)
-			}
-			params = append(params, index)
+	for _, row := range datavalues {
+		valuesInterface := make([]interface{}, len(row))
+		for i, v := range row {
+			valuesInterface[i] = v
+		}
 
-			if _, err := stmt.Exec(params...); err != nil {
-				return fmt.Errorf("failed to execute statement: %w", err)
-			}
+		_, err = stmt.Exec(valuesInterface...)
+		if err != nil {
+			return fmt.Errorf("failed to insert row: %w", err)
 		}
 	}
 

@@ -17,13 +17,20 @@ import (
 	"github.com/google/uuid"
 )
 
-//go:embed templates/*
+//go:embed templates/* assets/css/*
 var embeddedTemplatesFS embed.FS
+
+//go:embed assets/css/*
+var embeddedStylesFS embed.FS
 
 //go:embed query/*
 var sqlFS embed.FS
 
 var db *database.Database
+
+func homePage(c *gin.Context) {
+	c.HTML(http.StatusOK, "index.html", nil)
+}
 
 func readSql(filePath string) []byte {
 	schema, schemaerror := sqlFS.ReadFile(filePath)
@@ -189,16 +196,51 @@ func wasteLabelForm(c *gin.Context) {
 
 }
 
+func addChemical(c *gin.Context) {
+	if c.Request.Method == http.MethodPost {
+		sqlStatement := readSql("query/insert_chemical.sql")
+		casNumber := fmt.Sprintf("%s-%s-%s", strings.TrimSpace(c.PostForm("cas1")), strings.TrimSpace(c.PostForm("cas2")), strings.TrimSpace(c.PostForm("cas3")))
+		values := [][]string{
+			{casNumber, strings.TrimSpace(c.PostForm("chemical-name"))},
+		}
+		err := db.InsertData("chemicals", sqlStatement, values)
+		if err != nil {
+			fmt.Println("Error adding chemical:", err)
+		}
+	}
+	c.HTML(http.StatusOK, "add-chemical.html", nil)
+}
+
+func addMixture(c *gin.Context) {
+	if c.Request.Method == http.MethodPost {
+		sqlStatement := readSql("query/insert_mixture.sql")
+		casNumber := fmt.Sprintf("%s-%s-%s", strings.TrimSpace(c.PostForm("cas1")), strings.TrimSpace(c.PostForm("cas2")), strings.TrimSpace(c.PostForm("cas3")))
+		values := [][]string{
+			{casNumber, strings.TrimSpace(c.PostForm("chemical-name"))},
+		}
+		err := db.InsertData("mixtures", sqlStatement, values)
+		if err != nil {
+			fmt.Println("Error adding chemical:", err)
+		}
+	}
+	c.HTML(http.StatusOK, "add-chemical.html", nil)
+}
+
 func runLabelMaker() {
 	gin.SetMode(gin.ReleaseMode)
+	r := gin.Default()
+	r.StaticFS("/static", http.FS(embeddedStylesFS))
 
 	tmpl, _ := template.ParseFS(embeddedTemplatesFS, "templates/*")
-
-	r := gin.Default()
 	r.SetHTMLTemplate(tmpl)
 
-	r.GET("/", wasteLabelForm)
-	r.POST("/", wasteLabelForm)
+	r.GET("/", homePage)
+	r.GET("/create-tag", wasteLabelForm)
+	r.POST("/create-tag", wasteLabelForm)
+	r.GET("/add-chemical", addChemical)
+	r.POST("/add-chemical", addChemical)
+	r.GET("/add-mixture", addMixture)
+	r.POST("/add-mixture", addMixture)
 	r.Run(":8080")
 }
 
