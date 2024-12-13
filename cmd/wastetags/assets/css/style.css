@@ -1,0 +1,11 @@
+* {
+    font-family: monospace, monospace;
+  }
+
+  body {
+    background: dimgray;
+  }
+
+  h1 {
+    color: white;
+  }

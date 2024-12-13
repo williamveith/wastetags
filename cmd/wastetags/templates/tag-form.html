@@ -3,101 +3,21 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="/static/assets/css/tag-form.css" />
+    <link rel="stylesheet" href="/static/assets/css/navbar.css">
+    <link rel="stylesheet" href="/static/assets/css/footer.css" />
+    <link rel="stylesheet" href="/static/assets/css/style.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Waste Label Form</title>
-    <style>
-      * {
-        font-family: monospace, monospace;
-      }
-
-      body {
-        background: dimgray;
-      }
-
-      h1 {
-        color: white;
-      }
-
-      .parent {
-        width: 600px;
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        grid-template-rows: repeat(7, 1fr);
-        grid-column-gap: 0px;
-        grid-row-gap: 7px;
-      }
-
-      .parent > div {
-        padding: 10px;
-        border: 1px solid black;
-        background-color: #f0f0f0;
-      }
-
-      div {
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        align-items: flex-start;
-        flex-wrap: wrap;
-        border-radius: 4px;
-      }
-
-      input,
-      select {
-        width: 100%;
-      }
-
-      .div1 {
-        grid-area: 1 / 1 / 2 / 3;
-      }
-      .div2 {
-        grid-area: 2 / 1 / 3 / 3;
-      }
-      .div3 {
-        grid-area: 3 / 1 / 4 / 2;
-      }
-      .div4 {
-        grid-area: 3 / 2 / 4 / 3;
-      }
-      .div5 {
-        grid-area: 4 / 1 / 5 / 2;
-      }
-      .div6 {
-        grid-area: 4 / 2 / 5 / 3;
-      }
-      .div7 {
-        grid-area: 5 / 1 / 6 / 2;
-      }
-      .div8 {
-        grid-area: 5 / 2 / 6 / 3;
-      }
-      .div9 {
-        grid-area: 6 / 1 / 7 / 3;
-      }
-      footer {
-        background-color: #333;
-        color: white;
-        padding: 15px 20px;
-        text-align: center;
-        position: fixed; /* Makes the footer stick to the bottom */
-        bottom: 0;
-        width: 100%;
-        font-family: Arial, sans-serif;
-      }
-
-      footer a {
-        color: #4db8ff; /* Light blue link color */
-        text-decoration: none;
-      }
-
-      footer a:hover {
-        text-decoration: underline;
-      }
-    </style>
   </head>
   <body>
+    <nav class="navbar">
+      <a href="/">Home</a>
+      <a href="/create-tag">Create Tag</a>
+      <a href="/add-chemical">Add Chemical</a>
+    </nav>
     <h1>Generate Waste Label</h1>
-    <form class="parent" action="/" method="POST" autocomplete="off">
+    <form class="parent" action="/create-tag" method="POST" autocomplete="off">
       <div class="div1">
         <label for="location">Location:</label>
         <select id="location" name="location" required>
@@ -127,7 +47,8 @@
           step="1"
           min="1"
           pattern="^[0-9]+$"
-          required />
+          required
+        />
       </div>
 
       <div class="div4">
@@ -147,7 +68,8 @@
           id="contSize"
           name="contSize"
           pattern="^\d+\.\d{2}$"
-          required />
+          required
+        />
       </div>
 
       <div class="div6">
@@ -167,7 +89,8 @@
           id="quantity"
           name="quantity"
           pattern="^\d+\.\d{2}$"
-          required />
+          required
+        />
       </div>
 
       <div class="div8">
@@ -193,9 +116,14 @@
       <button type="submit">Generate Label</button>
     </form>
     <footer>
-      <a href="https://www.linkedin.com/in/william-veith/" class="author-link">
-        Label Generator - Author William Veith
-      </a>
+      <div class="footer">
+        <a
+          href="https://cdn.williamveith.com/?id=af59584e-d47b-4875-86cc-81b189ab069f"
+          class="author-link"
+        >
+          Label Generator - Author William Veith
+        </a>
+      </div>
     </footer>
     <script>
       const onlyNumbersAllowed = (event) => {

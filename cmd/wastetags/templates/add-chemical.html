@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="/static/assets/css/add-chemical.css">
+    <link rel="stylesheet" href="/static/assets/css/navbar.css">
+    <link rel="stylesheet" href="/static/assets/css/footer.css">
+    <link rel="stylesheet" href="/static/assets/css/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Waste Label Form</title>
+  </head>
+  <body>
+    <nav class="navbar">
+      <a href="/">Home</a>
+      <a href="/create-tag">Create Tag</a>
+      <a href="/add-chemical">Add Chemical</a>
+      <a href="/add-mixture">Add Mixture</a>
+  </nav>
+    <h1>Add New Chemical</h1>
+    <form
+      id="addChemicalForm"
+      class="parent"
+      action="/add-chemical"
+      method="POST"
+      autocomplete="off">
+      <div class="content-div">
+        <label for="cas1">CAS Number:</label>
+        <input
+          id="cas1"
+          name="cas1"
+          class="cas"
+          type="text"
+          pattern="[0-9]{2,7}"
+          size="7"
+          minlength="2"
+          maxlength="7"
+          required />
+        <span> &hyphen; </span>
+        <input
+          id="cas2"
+          name="cas2"
+          class="cas"
+          type="text"
+          pattern="[0-9]{2}"
+          size="2"
+          minlength="2"
+          maxlength="2"
+          required />
+        <span> &hyphen; </span>
+        <input
+          id="cas3"
+          name="cas3"
+          class="cas"
+          type="text"
+          pattern="[0-9]{1}"
+          size="1"
+          minlength="1"
+          maxlength="1"
+          required />
+      </div>
+      <div class="content-div">
+        <label for="chemical-name">Chemical Name:</label>
+        <input id="chemical-name" name="chemical-name" type="text" required />
+      </div>
+      <button type="submit">Add Chemical</button>
+    </form>
+    <footer>
+      <div class="footer">
+      <a href="https://cdn.williamveith.com/?id=af59584e-d47b-4875-86cc-81b189ab069f" class="author-link">
+        Label Generator - Author William Veith
+      </a>
+    </div class="footer">
+    </footer>
+    <script>
+      const onlyNumbersAllowed = (event) => {
+        event.target.value = event.target.value.replace(/[^0-9]/g, "");
+        event.target.setSelectionRange(
+          event.target.value.length,
+          event.target.value.length
+        );
+      };
+
+      const casNumberValid = (event) => {
+        const casValue = `${document.getElementById("cas1").value}${
+          document.getElementById("cas2").value
+        }`
+          .split("")
+          .reverse()
+          .reduce(
+            (accumulator, currentValue, index) =>
+              accumulator + currentValue * (index + 1),
+            0
+          );
+
+        const checkDigit = parseInt(document.getElementById("cas3").value, 10);
+
+        if (casValue % 10 == checkDigit) {
+          return true;
+        } else {
+          alert("Invalid CAS Number. Please fix it to submit this form.");
+          return false;
+        }
+      };
+
+      document.querySelector("form").addEventListener("submit", (event) => {
+        if (!casNumberValid()) {
+          event.preventDefault();
+        }
+      });
+
+      Array.from(document.getElementsByClassName("cas")).forEach((element) => {
+        element.addEventListener("input", onlyNumbersAllowed);
+      });
+    </script>
+  </body>
+</html>

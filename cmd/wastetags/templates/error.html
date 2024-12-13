@@ -1,11 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="/static/assets/css/navbar.css">
     <title>Error</title>
-</head>
-<body>
+  </head>
+  <body>
+    <nav class="navbar">
+      <a href="/">Home</a>
+      <a href="/create-tag">Create Tag</a>
+      <a href="/add-chemical">Add Chemical</a>
+      <a href="/add-mixture">Add Mixture</a>
+  </nav>
     <h1>An Error Occurred</h1>
     <p>{{.message}}</p>
-</body>
+  </body>
 </html>
