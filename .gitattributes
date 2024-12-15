@@ -1,1 +1,2 @@
+*.sqlite3 filter=lfs diff=lfs merge=lfs -text
 data/chemicals.sqlite3 filter=lfs diff=lfs merge=lfs -text
