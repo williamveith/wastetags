@@ -1,0 +1,83 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "version": {
+        "type": "string",
+        "pattern": "^v[0-9]+$"
+      },
+      "name": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "pattern": "^[0-9a-zA-Z]{20}$"
+        },
+        "minItems": 1
+      },
+      "values": {
+        "type": "object",
+        "properties": {
+          "chemName": {
+            "type": "string"
+          },
+          "contCount": {
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          },
+          "contSize": {
+            "type": "string",
+            "pattern": "^[0-9]+(\\.[0-9]{1,2})?$"
+          },
+          "contType": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "physState": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "string",
+            "pattern": "^[0-9]+(\\.[0-9]{1,2})?$"
+          },
+          "sizeUnit": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "chemName",
+          "contCount",
+          "contSize",
+          "contType",
+          "location",
+          "physState",
+          "quantity",
+          "sizeUnit",
+          "unit"
+        ]
+      },
+      "components": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "Chemical": {
+              "type": "string"
+            },
+            "Percentage": {
+              "type": "string",
+              "pattern": "^[0-9]+(\\.[0-9]+)?$"
+            }
+          },
+          "required": ["Chemical", "Percentage"]
+        },
+        "minItems": 1
+      }
+    },
+    "required": ["version", "name", "values", "components"]
+  }
+  
