@@ -12,10 +12,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-//go:embed templates/* assets/css/*
+//go:embed templates/*
+//go:exclude templates/.* templates/.*/**
 var embeddedTemplatesFS embed.FS
 
-//go:embed assets/css/*
+//go:embed assets/*
+//go:exclude assets/.* assets/.*/**
 var embeddedStylesFS embed.FS
 
 //go:embed query/*
