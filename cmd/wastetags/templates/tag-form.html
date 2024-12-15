@@ -4,20 +4,14 @@
     <meta charset="UTF-8" />
     <link rel="icon" href="data:," />
     <link rel="stylesheet" href="/static/assets/css/tag-form.css" />
-    <link rel="stylesheet" href="/static/assets/css/navbar.css">
-    <link rel="stylesheet" href="/static/assets/css/footer.css" />
     <link rel="stylesheet" href="/static/assets/css/style.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Waste Label Form</title>
   </head>
   <body>
-    <nav class="navbar">
-      <a href="/">Home</a>
-      <a href="/create-tag">Create Tag</a>
-      <a href="/add-chemical">Add Chemical</a>
-    </nav>
+    {{ template "component-navbar.html" . }}
     <h1>Generate Waste Label</h1>
-    <form class="parent" action="/create-tag" method="POST" autocomplete="off">
+    <form class="parent" action="/waste-tag" method="POST" autocomplete="off">
       <div class="div1">
         <label for="location">Location:</label>
         <select id="location" name="location" required>
@@ -115,16 +109,7 @@
 
       <button type="submit">Generate Label</button>
     </form>
-    <footer>
-      <div class="footer">
-        <a
-          href="https://cdn.williamveith.com/?id=af59584e-d47b-4875-86cc-81b189ab069f"
-          class="author-link"
-        >
-          Label Generator - Author William Veith
-        </a>
-      </div>
-    </footer>
+    {{ template "component-footer.html" . }}
     <script>
       const onlyNumbersAllowed = (event) => {
         event.target.value = event.target.value.replace(/(^0|[^0-9])/g, "");

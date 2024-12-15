@@ -4,19 +4,12 @@
     <meta charset="UTF-8" />
     <link rel="icon" href="data:," />
     <link rel="stylesheet" href="/static/assets/css/add-chemical.css">
-    <link rel="stylesheet" href="/static/assets/css/navbar.css">
-    <link rel="stylesheet" href="/static/assets/css/footer.css">
     <link rel="stylesheet" href="/static/assets/css/style.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Waste Label Form</title>
   </head>
   <body>
-    <nav class="navbar">
-      <a href="/">Home</a>
-      <a href="/create-tag">Create Tag</a>
-      <a href="/add-chemical">Add Chemical</a>
-      <a href="/add-mixture">Add Mixture</a>
-  </nav>
+    {{ template "component-navbar.html" . }}
     <h1>Add New Chemical</h1>
     <form
       id="addChemicalForm"
@@ -65,13 +58,7 @@
       </div>
       <button type="submit">Add Chemical</button>
     </form>
-    <footer>
-      <div class="footer">
-      <a href="https://cdn.williamveith.com/?id=af59584e-d47b-4875-86cc-81b189ab069f" class="author-link">
-        Label Generator - Author William Veith
-      </a>
-    </div class="footer">
-    </footer>
+    {{ template "component-footer.html" . }}
     <script>
       const onlyNumbersAllowed = (event) => {
         event.target.value = event.target.value.replace(/[^0-9]/g, "");

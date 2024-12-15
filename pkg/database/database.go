@@ -21,8 +21,6 @@ func NewDatabase(dbName string, schema []byte) *Database {
 	if err != nil {
 		log.Fatalf("Failed to open SQLite database: %v", err)
 	}
-
-	// Execute the schema
 	_, err = db.Exec(string(schema))
 	if err != nil {
 		log.Fatalf("Failed to initialize database schema: %v", err)
@@ -33,6 +31,13 @@ func NewDatabase(dbName string, schema []byte) *Database {
 		schema: string(schema),
 		db:     db,
 	}
+}
+
+func (cdb *Database) Close() error {
+	cdb.lock.Lock()
+	defer cdb.lock.Unlock()
+
+	return cdb.db.Close()
 }
 
 func (cdb *Database) InsertData(tableName string, sqlStatement []byte, datavalues [][]string) error {
@@ -108,13 +113,6 @@ func (cdb *Database) GetRowsByColumnValue(tableName string, sqlStatement []byte,
 	return result, err
 }
 
-func (cdb *Database) Close() error {
-	cdb.lock.Lock()
-	defer cdb.lock.Unlock()
-
-	return cdb.db.Close()
-}
-
 func SqlRowsToArray(rows *sql.Rows) ([]map[string]interface{}, error) {
 	columns, err := rows.Columns()
 	if err != nil {
@@ -137,7 +135,7 @@ func SqlRowsToArray(rows *sql.Rows) ([]map[string]interface{}, error) {
 
 		row := make(map[string]interface{})
 		for i, column := range columns {
-			row[column] = values[i] // Ensure column names are strings
+			row[column] = values[i]
 		}
 		result = append(result, row)
 	}

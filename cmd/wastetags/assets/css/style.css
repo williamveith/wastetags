@@ -1,11 +1,21 @@
-* {
-    font-family: monospace, monospace;
+@media print {
+  * {
+    color: white !important;
   }
 
   body {
-    background: dimgray;
+    background: white !important;
   }
+}
 
-  h1 {
-    color: white;
-  }
+* {
+  font-family: monospace, monospace;
+}
+
+body {
+  background: dimgray;
+}
+
+h1 {
+  color: white;
+}

@@ -3,6 +3,7 @@ BINARY_NAME := wastetags
 BINARY_DIR := bin
 BINARY_PATH := $(BINARY_DIR)/$(BINARY_NAME)
 CMD_DIR := cmd/$(BINARY_NAME)
+SRC_FILES := $(wildcard $(CMD_DIR)/*.go)
 DOCKER_COMPOSE_DIR := deployments
 DOCKER_COMPOSE_FILE := $(DOCKER_COMPOSE_DIR)/docker-compose.yml
 
@@ -13,7 +14,7 @@ all: build
 build: clean
 	@echo "Building the project..."
 	@mkdir -p $(BINARY_DIR)
-	@go build -ldflags="-s -w" -o $(BINARY_PATH) $(CMD_DIR)/main.go
+	@go build -ldflags="-s -w" -o $(BINARY_PATH) $(SRC_FILES)
 	@echo "Build complete. Binary located at $(BINARY_PATH)"
 
 # Run the application
