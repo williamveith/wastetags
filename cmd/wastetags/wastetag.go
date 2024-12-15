@@ -28,6 +28,7 @@ type Component struct {
 }
 
 type QRCodeData struct {
+	Version    string            `json:"version"`
 	WasteTags  []string          `json:"name"`
 	Values     map[string]string `json:"values"`
 	Components []Component       `json:"components"`
@@ -104,6 +105,7 @@ func completedWasteTag(c *gin.Context) (string, gin.H) {
 	}
 
 	qrCodeData := &QRCodeData{
+		Version:    "v1",
 		WasteTags:  []string{wasteTag},
 		Values:     values,
 		Components: componentData,
