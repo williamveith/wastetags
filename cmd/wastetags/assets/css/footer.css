@@ -1,3 +1,9 @@
+@media print {
+  footer {
+      display: none !important;
+  }
+}
+
 footer {
     display: flex;
     width: 99vw;
@@ -8,7 +14,7 @@ footer {
     background-color: #333;
     color: white;
     text-align: center;
-    position: fixed; /* Makes the footer stick to the bottom */
+    position: fixed;
     bottom: 0;
     width: 98vw;
     font-family: Arial, sans-serif;

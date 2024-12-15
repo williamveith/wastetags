@@ -1,0 +1,18 @@
+<nav class="navbar">
+  {{ if ne .CurrentPath "/home" }}
+    <a href="/home">Home</a>
+  {{ end }}
+
+  {{ if ne .CurrentPath "/create-tag" }}
+    <a href="/create-tag">Create Tag</a>
+  {{ end }}
+
+  {{ if ne .CurrentPath "/add-chemical" }}
+    <a href="/add-chemical">Add Chemical</a>
+  {{ end }} 
+  
+  {{ if ne .CurrentPath "/add-mixture" }}
+    <a href="/add-mixture">Add Mixture</a>
+  {{ end }}
+</nav>
+<link rel="stylesheet" href="/static/assets/css/navbar.css">
