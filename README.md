@@ -1,264 +1,89 @@
-# WasteTags
+# Waste Tagging System
 
-WasteTags is a web application for generating chemical waste labels with embedded QR codes. It allows users to input chemical information, generates a unique waste tag, and produces a label that can be printed and attached to waste containers. The application uses a SQLite database to retrieve chemical component data and generates QR codes containing waste information for easy scanning and tracking.
-
-## Future Development Ideas
-
-- Investigate using [WAILS](https://wails.io/) for the front end. Can be dockerized & build Windows, macOS, and Linux desktop apps & allows for Go backend
--
-
-## Table of Contents
-
-- [Features](#features)
-- [Prerequisites](#prerequisites)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Makefile Commands](#makefile-commands)
-- [Docker Deployment](#docker-deployment)
-- [Project Structure](#project-structure)
+The Waste Tagging System is a web application designed to streamline the process of creating and managing waste labels. It provides a user-friendly interface for adding new chemicals, creating mixtures, and generating QR-code-enhanced labels for containers containing hazardous or non-hazardous waste. This system helps ensure regulatory compliance, improves inventory tracking, and simplifies waste disposal management workflows.
 
 ## Features
 
-- Generate unique waste tags using UUIDs.
-- Retrieve chemical component data from a SQLite database.
-- Generate QR codes containing waste information.
-- Render labels using HTML templates.
-- Embed static assets using Go's `embed` package.
-- Run the application locally or inside a Docker container.
+- **Add New Chemical**: Enter CAS numbers and chemical names through a guided form. The application validates CAS numbers to ensure data integrity.
+- **Add Mixture**: Combine individual chemicals to form a mixture. Each mixture entry can be reused when generating waste labels.
+- **Generate Waste Labels**: Create and print waste tags that include:
+  - Unique QR codes for each label.
+  - Information such as room number, generator name, chemical components, and their percentages.
+  - Multiple copies of labels with unique identifiers generated on the fly.
+- **Embedded Resources**: Comes with embedded HTML templates, CSS, and SQL schema. This makes deployment and configuration simpler.
+- **Scalable API**: Integrated endpoints for managing database entries and generating dynamic QR codes for labeling.
+
+## Technology Stack
+
+- **Backend**: Go (Golang) with [Gin](https://github.com/gin-gonic/gin) for routing and HTTP request handling.
+- **Database**: SQLite3 for local storage of chemicals, mixtures, locations, containers, units, and states.
+- **QR Code Generation**: Leveraging `github.com/williamveith/wastetags/pkg/qrcodegen` for creating data URIs from JSON payloads.
+- **Templates & Assets**: Embedded using Go’s `embed` package, making the application self-contained.
 
 ## Prerequisites
 
-- [Go (Golang) 1.17 or later](https://golang.org/dl/)
-- [Git](https://git-scm.com/downloads)
-- [Docker](https://www.docker.com/products/docker-desktop) (for Docker deployment)
-- [Docker Compose](https://docs.docker.com/compose/install/) (for Docker deployment)
+- **Go (1.19+ recommended)**: Ensure [Go](https://go.dev/) is installed.
+- **SQLite3**: The database is automatically initialized from embedded SQL files. No separate installation required unless you want to inspect the database independently.
+- **Git**: If you plan on cloning the repository directly.
 
-## Installation
+## Build The App
 
-Clone the repository and navigate to the project directory:
+1. Clone the Repository
+2. Navigate to Project Directory
+3. Build the Project
 
-```sh
-git clone https://github.com/yourusername/wastetags.git
-cd wastetags
-```
+  ```sh
+  git clone https://github.com/yourusername/wastetags.git
+  cd wastetags
+  make build
+  ```
 
-## Usage
+## Use The App
 
-### Running Locally
+Double click the binary generated in the build located in the bin directory or use the make run command in the wastetags directory. The UI can be accessed at `http://localhost:8080`
 
-Ensure that you have Go installed and your `GOPATH` is set up.
+From here, you can:
 
-1. **Install Dependencies**
+- Navigate to **Add Chemical**: `/add-chemical`
+- Navigate to **Add Mixture**: `/add-mixture`
+- Navigate to **Create Tag**: `/create-tag`
 
-   ```sh
-   make deps
-   ```
+## Feature Details
 
-2. **Build the Application**
+1. **Adding a Chemical**:
+   - Go to `/add-chemical`.
+   - Enter the CAS number in three parts (e.g., `64-17-5` for ethanol).
+   - Provide the chemical name.
+   - Click **Add Chemical**. The CAS number will be validated before submission.
 
-   ```sh
-   make build
-   ```
+2. **Adding a Mixture**:
+   - Go to `/add-mixture`.
+   - Specify a CAS number and name for your mixture (e.g., a solvent mixture).
+   - After submission, the mixture information can be used when creating waste tags.
 
-3. **Run the Application**
-
-   ```sh
-   make run
-   ```
-
-   The application will start on `http://localhost:8080`.
-
-4. **Access the Application**
-
-   Open your web browser and navigate to `http://localhost:8080` to use the waste label generator.
-
-### Running with Docker
-
-Ensure Docker and Docker Compose are installed.
-
-1. **Build and Start the Docker Container**
-
-   ```sh
-   make docker-up
-   ```
-
-2. **Access the Application**
-
-   Open your web browser and navigate to `http://localhost:8080`.
-
-3. **Stop the Docker Container**
-
-   ```sh
-   make docker-down
-   ```
-
-## Makefile Commands
-
-The project includes a `Makefile` to streamline common tasks. Below is an explanation of the available commands:
-
-- **Build Commands**
-
-  - `make` or `make build`: Builds the Go application and outputs the binary to the `bin/` directory.
-
-    ```sh
-    make build
-    ```
-
-- **Run Commands**
-
-  - `make run`: Builds the application (if not already built) and runs it.
-
-    ```sh
-    make run
-    ```
-
-- **Clean Commands**
-
-  - `make clean`: Removes the built binaries and cleans up the `bin/` directory.
-
-    ```sh
-    make clean
-    ```
-
-- **Dependency Management**
-
-  - `make deps`: Ensures all module dependencies are up to date using `go mod tidy`.
-
-    ```sh
-    make deps
-    ```
-
-- **Testing Commands**
-
-  - `make test`: Runs all tests in the project.
-
-    ```sh
-    make test
-    ```
-
-- **Code Quality Commands**
-
-  - `make fmt`: Formats the code using `go fmt`.
-
-    ```sh
-    make fmt
-    ```
-
-  - `make lint`: Lints the code using `golangci-lint` (requires installation).
-
-    ```sh
-    make lint
-    ```
-
-- **Code Generation**
-
-  - `make generate`: Runs code generation tools (if applicable).
-
-    ```sh
-    make generate
-    ```
-
-- **Docker Commands**
-
-  - `make docker-up`: Builds the Docker image and starts the services defined in `docker-compose.yml`.
-
-    ```sh
-    make docker-up
-    ```
-
-  - `make docker-down`: Stops and removes the Docker services.
-
-    ```sh
-    make docker-down
-    ```
-
-  - `make docker-build-no-cache`: Builds the Docker image without using the cache.
-
-    ```sh
-    make docker-build-no-cache
-    ```
-
-  - `make docker-logs`: Follows the logs from the Docker services.
-
-    ```sh
-    make docker-logs
-    ```
-
-- **Help Command**
-
-  - `make help`: Displays the help message with a list of available commands.
-
-    ```sh
-    make help
-    ```
-
-## Docker Deployment
-
-The application can be containerized using Docker for ease of deployment.
-
-### Build and Run with Docker Compose
-
-1. **Start the Services**
-
-   ```sh
-   make docker-up
-   ```
-
-2. **Access the Application**
-
-   Visit `http://localhost:8080` in your web browser.
-
-3. **View Logs**
-
-   ```sh
-   make docker-logs
-   ```
-
-4. **Stop the Services**
-
-   ```sh
-   make docker-down
-   ```
-
-### Notes
-
-- The `docker-compose.yml` file is located in the `deployments/` directory.
-- The `data/` directory is mounted as a volume inside the Docker container to persist the SQLite database.
+3. **Creating a Waste Tag**:
+   - Go to `/create-tag`.
+   - Select the **Location**, **Chemical Name**, container details, and amount.
+   - Submit the form to generate a waste label with a QR code.
+   - Print the label by using your browser’s print functionality. You can also specify multiple copies and generate unique QR codes for each one.
 
 ## Project Structure
 
-```txt
-wastetags
-├── Makefile
-├── bin
-│   └── wastetags
-├── build
-│   └── package
-│       └── Dockerfile
-├── cmd
-│   └── wastetags
-│       ├── main.go
-│       └── templates
-│           ├── tag-form.html
-│           └── tag.html
-├── data
-│   └── chemicals.sqlite3
-├── deployments
-│   └── docker-compose.yml
-├── go.mod
-├── go.sum
-└── pkg
-    ├── database
-    │   └── database.go
-    └── qrcodegen
-        └── qrcodegen.go
-```
+- **`cmd/wastetags`**: Main application entry point.
+- **`pkg/database`**: Database interaction and initialization.
+- **`templates/`**: Embedded HTML templates for the user interface.
+- **`assets/`**: Embedded CSS styles and images for UI styling.
+- **`query/`**: Embedded SQL files for schema setup and queries.
+- **`Makefile`**: Build and run targets for the project.
+- **`Dockerfile` and `docker-compose.yml` (if present)**: For containerized deployment (adjust as needed).
 
-- `cmd/wastetags/main.go`: The entry point of the application.
-- `cmd/wastetags/templates/`: HTML templates for rendering forms and labels.
-- `pkg/database/`: Package handling database operations.
-- `pkg/qrcodegen/`: Package for generating QR codes.
-- `data/chemicals.sqlite3`: SQLite database containing chemical information.
-- `build/package/Dockerfile`: Dockerfile for building the Docker image.
-- `deployments/docker-compose.yml`: Docker Compose configuration.
-- `Makefile`: Build and management commands.
+## Customization & Configuration
+
+- **Port**: The application runs by default on port `:8080`. Modify the `r.Run(":8080")` line in `runLabelMaker()` to change the port.
+- **Database Path**: The SQLite database defaults to `data/chemicals.sqlite3`. Modify the `init()` function in the code to point to a different database file if desired.
+
+## Troubleshooting
+
+- **Schema Load Errors**: Ensure that the `query/schema.sql` file is present and can be read. The database initialization requires it.
+- **Permission Errors**: If running on a restricted environment, ensure the application has the necessary permissions to read embedded files and create the database file.
+- **CORS Issues**: Since the application is typically accessed from the same origin, CORS settings aren’t commonly needed. If deploying behind a reverse proxy or integrating with another frontend, you may need to configure CORS policies within Gin.
