@@ -48,7 +48,8 @@
     <script>
       function updateQrCode(clonedLabel, newInfo) {
         clonedLabel.querySelector("#qrCodeDataUri").src = newInfo["dataURI"];
-        clonedLabel.querySelector("#qrCodeValue").value = newInfo["jsonContent"];
+        clonedLabel.querySelector("#qrCodeValue").value =
+          newInfo["jsonContent"];
         const detailsElement = clonedLabel.querySelector(".details");
         const idMatch = detailsElement.textContent.match(/ID:\s*([^\s]+)/);
         if (idMatch) {
@@ -59,24 +60,19 @@
         }
       }
 
-      const onlyNumbersAllowed = (event) => {
-        event.target.value = event.target.value.replace(/(^0|[^0-9])/g, "");
-        event.target.setSelectionRange(
-          event.target.value.length,
-          event.target.value.length
-        );
-      };
-
       const numberOfCopies = async (event) => {
         const desiredNumberOfCopies = parseInt(event.target.value, 10);
         if (desiredNumberOfCopies >= 1) {
-          const tagElements = Array.from(document.getElementsByClassName("label"))
-          const changeInNumberOfCopies = desiredNumberOfCopies-tagElements.length
-          
-          if(changeInNumberOfCopies < 0){
-            while(tagElements.length > desiredNumberOfCopies){
-              tagElement = tagElements.pop()
-              tagElement.remove()
+          const tagElements = Array.from(
+            document.getElementsByClassName("label")
+          );
+          const changeInNumberOfCopies =
+            desiredNumberOfCopies - tagElements.length;
+
+          if (changeInNumberOfCopies < 0) {
+            while (tagElements.length > desiredNumberOfCopies) {
+              tagElement = tagElements.pop();
+              tagElement.remove();
             }
           }
 
@@ -107,14 +103,16 @@
           }
         }
       };
-
-      document
-        .getElementById("numberOfCopies")
-        .addEventListener("input", onlyNumbersAllowed);
       document
         .getElementById("numberOfCopies")
         .addEventListener("input", numberOfCopies);
     </script>
-    <script src="/static/assets/js/general.js"></script>
+    <script type="module">
+      import { onlyNumbersAllowed } from "/static/assets/js/input-validators.js";
+      document
+        .getElementById("numberOfCopies")
+        .addEventListener("input", onlyNumbersAllowed);
+    </script>
+    <script src="/static/assets/js/arrow-navigation.js"></script>
   </body>
 </html>

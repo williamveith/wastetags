@@ -41,8 +41,7 @@
           step="1"
           min="1"
           pattern="^[0-9]+$"
-          required
-        />
+          required />
       </div>
 
       <div class="div4">
@@ -62,8 +61,7 @@
           id="contSize"
           name="contSize"
           pattern="^\d+\.\d{2}$"
-          required
-        />
+          required />
       </div>
 
       <div class="div6">
@@ -83,8 +81,7 @@
           id="quantity"
           name="quantity"
           pattern="^\d+\.\d{2}$"
-          required
-        />
+          required />
       </div>
 
       <div class="div8">
@@ -110,34 +107,21 @@
       <button type="submit">Generate Label</button>
     </form>
     {{ template "component-footer.html" . }}
-    <script>
-      const onlyNumbersAllowed = (event) => {
-        event.target.value = event.target.value.replace(/(^0|[^0-9])/g, "");
-        event.target.setSelectionRange(
-          event.target.value.length,
-          event.target.value.length
-        );
-      };
-
-      const upToTwoDecimals = (event) => {
-        event.target.value = event.target.value.replace(
-          /[^0-9.]|(\.\d{2})\d+|(\..*)\./g,
-          (match, group1) => group1 || ""
-        );
-        event.target.setSelectionRange(
-          event.target.value.length,
-          event.target.value.length
-        );
-      };
-
-      const numberOfItemsField = document.getElementById("count");
-      const containerSizeField = document.getElementById("contSize");
-      const quantityInputField = document.getElementById("quantity");
-
-      numberOfItemsField.addEventListener("input", onlyNumbersAllowed);
-      quantityInputField.addEventListener("input", upToTwoDecimals);
-      containerSizeField.addEventListener("input", upToTwoDecimals);
+    <script type="module">
+      import {
+        onlyNumbersAllowed,
+        upToTwoDecimals
+      } from "/static/assets/js/input-validators.js";
+      document
+        .getElementById("count")
+        .addEventListener("input", onlyNumbersAllowed);
+      document
+        .getElementById("contSize")
+        .addEventListener("input", upToTwoDecimals);
+      document
+        .getElementById("quantity")
+        .addEventListener("input", upToTwoDecimals);
     </script>
-    <script src="/static/assets/js/general.js"></script>
+    <script src="/static/assets/js/arrow-navigation.js"></script>
   </body>
 </html>

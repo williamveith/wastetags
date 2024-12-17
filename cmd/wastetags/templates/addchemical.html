@@ -60,14 +60,6 @@
     </form>
     {{ template "component-footer.html" . }}
     <script>
-      const onlyNumbersAllowed = (event) => {
-        event.target.value = event.target.value.replace(/[^0-9]/g, "");
-        event.target.setSelectionRange(
-          event.target.value.length,
-          event.target.value.length
-        );
-      };
-
       const casNumberValid = (event) => {
         const casValue = `${document.getElementById("cas1").value}${
           document.getElementById("cas2").value
@@ -95,13 +87,15 @@
           event.preventDefault();
         }
       });
-
+    </script>
+    <script type="module">
+      import { onlyNumberDigitsAllowed } from "/static/assets/js/input-validators.js";
       Array.from(document.getElementsByClassName("cas")).forEach(
         (element, index) => {
-          element.addEventListener("input", onlyNumbersAllowed);
+          element.addEventListener("input", onlyNumberDigitsAllowed);
         }
       );
     </script>
-    <script src="/static/assets/js/general.js"></script>
+    <script src="/static/assets/js/arrow-navigation.js"></script>
   </body>
 </html>

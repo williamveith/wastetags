@@ -1,4 +1,5 @@
-const arrowNavigation = (event, elementIndex, elements) => {
+const arrowNavigation = (event, elements) => {
+    const elementIndex = elements.indexOf(document.activeElement);
     switch (event.key) {
         case "ArrowRight":
             if (elementIndex < elements.length - 1) {
@@ -20,15 +21,17 @@ const arrowNavigation = (event, elementIndex, elements) => {
         case "ArrowUp":
             elements[0].focus();
             break;
+        default:
+            return;
     }
     event.preventDefault();
 }
 
 document.addEventListener("DOMContentLoaded", () => {
     const inputElements = Array.from(document.querySelectorAll("input"));
-    inputElements.forEach((element, index) => {
+    inputElements.forEach((element) => {
         element.addEventListener("keydown", (event) => {
-            arrowNavigation(event, index, inputElements);
+            arrowNavigation(event, inputElements);
         });
     });
 });
