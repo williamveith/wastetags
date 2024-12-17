@@ -44,14 +44,14 @@ Double click the binary generated in the build located in the bin directory or u
 
 From here, you can:
 
-- Navigate to **Add Chemical**: `/add-chemical`
+- Navigate to **Add Chemical**: `/addchemical`
 - Navigate to **Add Mixture**: `/add-mixture`
 - Navigate to **Create Tag**: `/create-tag`
 
 ## Feature Details
 
 1. **Adding a Chemical**:
-   - Go to `/add-chemical`.
+   - Go to `/addchemical`.
    - Enter the CAS number in three parts (e.g., `64-17-5` for ethanol).
    - Provide the chemical name.
    - Click **Add Chemical**. The CAS number will be validated before submission.

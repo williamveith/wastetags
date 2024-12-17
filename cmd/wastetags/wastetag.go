@@ -65,10 +65,13 @@ func generateShortUUID(length int) string {
 	rawUUID := uuid.New()
 	base64Encoded := base64.StdEncoding.EncodeToString(rawUUID[:])
 	base64Clean := strings.NewReplacer("+", "", "/", "", "=", "").Replace(base64Encoded)
+	if length > len(base64Clean) {
+		length = len(base64Clean)
+	}
 	return base64Clean[:length]
 }
 
-func completedWasteTag(c *gin.Context) (string, gin.H) {
+func makeWasteTag(c *gin.Context) (string, gin.H) {
 	genericErrorMessage := gin.H{"message": "Internal Server Error"}
 
 	if c.Request.Method != http.MethodPost {
@@ -122,5 +125,5 @@ func completedWasteTag(c *gin.Context) (string, gin.H) {
 		"Components":    componentData,
 	}
 
-	return "tag.html", templateData
+	return "wastetag.html", templateData
 }

@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" href="/static/assets/images/favicon.png" />
-    <link rel="stylesheet" href="/static/assets/css/tag-form.css" />
+    <link rel="stylesheet" href="/static/assets/css/wastetagform.css" />
     <link rel="stylesheet" href="/static/assets/css/style.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Waste Label Maker</title>
@@ -11,7 +11,7 @@
   <body>
     {{ template "component-navbar.html" . }}
     <h1>Generate Waste Label</h1>
-    <form class="parent" action="/waste-tag" method="POST" autocomplete="off">
+    <form class="parent" action="/wastetag" method="POST" autocomplete="off">
       <div class="div1">
         <label for="location">Location:</label>
         <select id="location" name="location" required>

@@ -23,5 +23,5 @@ func addMixture(c *gin.Context) (string, gin.H) {
 			}
 		}
 	}
-	return "add-chemical.html", nil
+	return "addchemical.html", nil
 }

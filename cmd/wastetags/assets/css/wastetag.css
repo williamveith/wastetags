@@ -2,6 +2,17 @@
     .tag-utilities {
         display: none !important;
     }
+
+    .label {
+      page-break-inside: avoid;
+      margin-bottom: 0.1in;
+    }
+
+    .label::after {
+      content: "";
+      display: block;
+      page-break-after: auto;
+  }
 }
 
 * {
