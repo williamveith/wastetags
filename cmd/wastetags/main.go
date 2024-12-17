@@ -26,7 +26,7 @@ var sqlFS embed.FS
 var db *database.Database
 
 func homePage(c *gin.Context) (string, gin.H) {
-	return "index.html", nil
+	return "home.html", nil
 }
 
 func readSql(filePath string) []byte {

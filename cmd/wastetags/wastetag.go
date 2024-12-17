@@ -75,7 +75,7 @@ func makeWasteTag(c *gin.Context) (string, gin.H) {
 	genericErrorMessage := gin.H{"message": "Internal Server Error"}
 
 	if c.Request.Method != http.MethodPost {
-		return "index.html", nil
+		return "home.html", nil
 	}
 
 	values := map[string]string{
