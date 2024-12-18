@@ -17,12 +17,18 @@ build: clean
 	@go build -ldflags="-s -w" -o $(BINARY_PATH) $(SRC_FILES)
 	@echo "Build complete. Binary located at $(BINARY_PATH)"
 
+# scp /Users/main/Projects/Go/wastetags/bin/pi/wastetags pi.local:~
+# scp /Users/main/Projects/Go/wastetags/bin/pi/config.json pi.local:~
+# scp /Users/main/Projects/Go/wastetags/bin/pi/chemicals.sqlite3 pi.local:~
+# scp /Users/main/Projects/Go/wastetags/bin/pi/wastetags.service pi.local:~
 pi: clean
 	@echo "Building for Raspberry Pi..."
-	@mkdir -p $$(pwd)/bin/pi/data
-	@docker build -t wastetags:latest -f build/package/Dockerfile .
+	@mkdir -p $$(pwd)/bin/pi
+	@docker build -t wastetags:latest -f build/pi/Dockerfile .
 	@docker run --rm -v $$(pwd)/bin/pi:/export wastetags:latest cp /wastetags /export/
-	@cp $$(pwd)/data/chemicals.sqlite3 $$(pwd)/bin/pi/data/chemicals.sqlite3
+	@cp $$(pwd)/data/chemicals.sqlite3 $$(pwd)/bin/pi/chemicals.sqlite3
+	@cp $$(pwd)/build/pi/wastetags.service $$(pwd)/bin/pi/wastetags.service
+	@cp $$(pwd)/build/pi/config.json $$(pwd)/bin/pi/config.json
 
 # Run the application
 run: build

@@ -1,0 +1,16 @@
+[Unit]
+Description=WasteTags Service
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/wastetags --config /etc/wastetags/config.json
+
+# Ensure that systemd knows this is a simple service that does not fork.
+Type=simple
+
+# Restart on failure to ensure high availability.
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
