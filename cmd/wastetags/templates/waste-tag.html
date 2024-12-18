@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" href="/static/assets/images/favicon.png" />
-    <link rel="stylesheet" href="/static/assets/css/wastetag.css" />
+    <link rel="stylesheet" href="/static/assets/css/waste-tag.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Waste Label Maker</title>
   </head>
@@ -80,7 +80,7 @@
             const clonedTag = tagElements[0].cloneNode(true);
 
             try {
-              const response = await fetch("/api/generate-qr", {
+              const response = await fetch("/api/generate-qrcode", {
                 method: "POST",
                 headers: {
                   "Content-Type": "application/json"

@@ -71,7 +71,30 @@ func generateShortUUID(length int) string {
 	return base64Clean[:length]
 }
 
-func makeWasteTag(c *gin.Context) (string, gin.H) {
+func MakeNewQRCode(c *gin.Context) {
+	var requestData map[string]interface{}
+
+	if err := c.ShouldBindJSON(&requestData); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
+		return
+	}
+
+	qrCodeData, err := convertMapToQRCodeData(requestData)
+	dataURI, jsonContent, wasteTag := qrCodeData.makeCopy()
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"dataURI":     dataURI,
+		"jsonContent": jsonContent,
+		"wasteTag":    wasteTag,
+	})
+}
+
+func MakeWasteTag(c *gin.Context) (string, gin.H) {
 	genericErrorMessage := gin.H{"message": "Internal Server Error"}
 
 	if c.Request.Method != http.MethodPost {
@@ -125,5 +148,5 @@ func makeWasteTag(c *gin.Context) (string, gin.H) {
 		"Components":    componentData,
 	}
 
-	return "wastetag.html", templateData
+	return "waste-tag.html", templateData
 }

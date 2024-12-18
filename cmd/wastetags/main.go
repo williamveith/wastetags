@@ -12,8 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-//go:embed templates/*
-//go:exclude templates/.* templates/.*/**
+//go:embed templates/*.html
 var embeddedTemplatesFS embed.FS
 
 //go:embed assets/*
@@ -24,10 +23,6 @@ var embeddedStylesFS embed.FS
 var sqlFS embed.FS
 
 var db *database.Database
-
-func homePage(c *gin.Context) (string, gin.H) {
-	return "home.html", nil
-}
 
 func readSql(filePath string) []byte {
 	schema, schemaerror := sqlFS.ReadFile(filePath)
@@ -45,6 +40,12 @@ func init() {
 		log.Fatalf("Failed to read schema.sql, cannot initialize database")
 	}
 	db = database.NewDatabase(dbName, sqlStatement)
+}
+
+func redirectHandler(path string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Redirect(http.StatusMovedPermanently, path)
+	}
 }
 
 func pageHandler(handler func(c *gin.Context) (string, gin.H)) gin.HandlerFunc {
@@ -68,56 +69,24 @@ func addCurrentPathMiddleware() gin.HandlerFunc {
 	}
 }
 
-func runLabelMaker() {
+func main() {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
-	r.StaticFS("/static", http.FS(embeddedStylesFS))
 
 	tmpl, _ := template.ParseFS(embeddedTemplatesFS, "templates/*")
 	r.SetHTMLTemplate(tmpl)
+	r.StaticFS("/static", http.FS(embeddedStylesFS))
 
 	r.Use(addCurrentPathMiddleware())
 
-	r.GET("/", func(c *gin.Context) {
-		c.Redirect(http.StatusMovedPermanently, "/home")
-	})
-
-	r.POST("/api/generate-qr", func(c *gin.Context) {
-		var requestData map[string]interface{}
-
-		// Parse the JSON request body
-		if err := c.ShouldBindJSON(&requestData); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
-			return
-		}
-
-		// Call the Go function to generate QR code
-		qrCodeData, err := convertMapToQRCodeData(requestData)
-		dataURI, jsonContent, wasteTag := qrCodeData.makeCopy()
-
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-
-		// Respond with the result
-		c.JSON(http.StatusOK, gin.H{
-			"dataURI":     dataURI,
-			"jsonContent": jsonContent,
-			"wasteTag":    wasteTag,
-		})
-	})
-
-	r.GET("/home", pageHandler(homePage))
-	r.GET("/create-tag", pageHandler(makeWasteTagForm))
-	r.POST("/wastetag", pageHandler(makeWasteTag))
-	r.GET("/addchemical", pageHandler(addChemical))
-	r.POST("/addchemical", pageHandler(addChemical))
-	r.GET("/add-mixture", pageHandler(addMixture))
-	r.POST("/add-mixture", pageHandler(addMixture))
+	r.GET("/", redirectHandler("/home"))
+	r.GET("/home", pageHandler(HomePage))
+	r.GET("/waste-tag-form", pageHandler(MakeWasteTagForm))
+	r.POST("/waste-tag", pageHandler(MakeWasteTag))
+	r.GET("/add-chemical", pageHandler(AddChemical))
+	r.POST("/add-chemical", pageHandler(AddChemical))
+	r.GET("/add-mixture", pageHandler(AddMixture))
+	r.POST("/add-mixture", pageHandler(AddMixture))
+	r.POST("/api/generate-qrcode", MakeNewQRCode)
 	r.Run(":8080")
-}
-
-func main() {
-	runLabelMaker()
 }

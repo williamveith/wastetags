@@ -46,7 +46,7 @@ From here, you can:
 
 - Navigate to **Add Chemical**: `/addchemical`
 - Navigate to **Add Mixture**: `/add-mixture`
-- Navigate to **Create Tag**: `/create-tag`
+- Navigate to **Create Tag**: `/waste-tag-form`
 
 ## Feature Details
 
@@ -62,7 +62,7 @@ From here, you can:
    - After submission, the mixture information can be used when creating waste tags.
 
 3. **Creating a Waste Tag**:
-   - Go to `/create-tag`.
+   - Go to `/waste-tag-form`.
    - Select the **Location**, **Chemical Name**, container details, and amount.
    - Submit the form to generate a waste label with a QR code.
    - Print the label by using your browser’s print functionality. You can also specify multiple copies and generate unique QR codes for each one.

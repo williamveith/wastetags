@@ -1,15 +1,18 @@
-CREATE TABLE IF NOT EXISTS mixtures (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    chem_name TEXT,
-    component_name TEXT,
-    cas TEXT,
-    percent TEXT,
-    component_order INTEGER
-);
+PRAGMA foreign_keys = ON; 
 
 CREATE TABLE IF NOT EXISTS chemicals (
     cas TEXT PRIMARY KEY,
-    chem_name TEXT
+    chem_name TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS mixtures (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    chem_name TEXT NOT NULL,
+    component_name TEXT NOT NULL,
+    cas TEXT NOT NULL,
+    percent TEXT NOT NULL,
+    component_order INTEGER,
+    FOREIGN KEY (cas) REFERENCES chemicals (cas) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS locations (
@@ -18,7 +21,7 @@ CREATE TABLE IF NOT EXISTS locations (
 
 CREATE TABLE IF NOT EXISTS containers (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT,
+    name TEXT NOT NULL,
     abbreviation TEXT,
     full_name TEXT GENERATED ALWAYS AS (
         CASE 
@@ -30,7 +33,7 @@ CREATE TABLE IF NOT EXISTS containers (
 
 CREATE TABLE IF NOT EXISTS units (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT,
+    name TEXT NOT NULL,
     abbreviation TEXT,
     full_name TEXT GENERATED ALWAYS AS (
         CASE 

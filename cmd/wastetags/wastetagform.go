@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func makeWasteTagForm(c *gin.Context) (string, gin.H) {
+func MakeWasteTagForm(c *gin.Context) (string, gin.H) {
 	genericErrorMessage := gin.H{"message": "Internal Server Error"}
 
 	if c.Request.Method != http.MethodGet {
@@ -87,5 +87,5 @@ func makeWasteTagForm(c *gin.Context) (string, gin.H) {
 		"States":     cleanStates,
 	}
 
-	return "wastetagform.html", pageData
+	return "waste-tag-form.html", pageData
 }
