@@ -1,42 +1,18 @@
-# Build Stage
-FROM golang:1.23.2-alpine3.20 AS builder
-
-# Install build dependencies
-RUN apk add --no-cache build-base sqlite-dev
-
-# Enable CGO
-ENV CGO_ENABLED=1
+# Use a Go base image
+FROM golang:1.23.2-bullseye AS builder
 
 # Set the working directory inside the container
 WORKDIR /app
 
-# Copy go.mod and go.sum
-COPY go.mod go.sum ./
+# Copy the entire project to the container
+COPY . .
 
 # Download dependencies
 RUN go mod download
 
-# Copy the source code into the working directory
-COPY cmd/ ./cmd/
-COPY pkg/ ./pkg/
+# Build the binary for Linux ARM64
+RUN CGO_ENABLED=1 GOOS=linux GOARCH=arm64 CC=aarch64-linux-gnu-gcc go build -ldflags="-s -w" -o wastetags ./cmd/wastetags/*.go
 
-# Build the Go binary
-RUN go build -ldflags="-s -w" -o wastetags ./cmd/wastetags/main.go
-
-# Final Stage
-FROM alpine:3.20
-
-# Install runtime dependencies
-RUN apk add --no-cache libc6-compat sqlite-libs
-
-# Set the working directory
-WORKDIR /app
-
-# Copy the binary from the builder stage
-COPY --from=builder /app/wastetags .
-
-# Expose the application port
-EXPOSE 8080
-
-# Set the entrypoint to the compiled binary
-ENTRYPOINT ["./wastetags"]
+# Create a minimal final image
+FROM alpine:3.18
+COPY --from=builder /app/wastetags /wastetags
