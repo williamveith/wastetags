@@ -94,7 +94,6 @@
 
               const result = await response.json();
               updateQrCode(clonedTag, result);
-
               tagElements[0].after(clonedTag);
             } catch (error) {
               console.error("Error:", error);

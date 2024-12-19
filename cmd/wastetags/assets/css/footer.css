@@ -6,7 +6,7 @@
 
 footer {
   display: flex;
-  justify-content: center;
+  justify-content: right;
   width: 98%;
   margin: 8px;
   position: fixed;
@@ -17,12 +17,11 @@ footer {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #333;
+  background-color: #33333397;
   border-radius: 3px;
   text-align: center;
   margin-bottom: 1px;
   padding: 0 16px;
-  width: 100%;
 }
 
 footer a {

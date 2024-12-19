@@ -9,8 +9,10 @@ ExecStart=/usr/local/bin/wastetags --config /etc/wastetags/config.json
 Type=simple
 
 # Restart on failure to ensure high availability.
-Restart=on-failure
+Restart=always
 RestartSec=5
+
+User=main
 
 [Install]
 WantedBy=multi-user.target

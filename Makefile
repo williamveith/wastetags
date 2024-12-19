@@ -2,7 +2,9 @@
 BINARY_NAME := wastetags
 BINARY_DIR := bin
 CONFIG_DIR := configs
+BUILD_DIR := build
 DATA_FILE := data/chemicals.sqlite3
+USER := pi.local
 
 # Default target
 all: linux
@@ -16,8 +18,18 @@ linux:
 	@docker build -t wastetags:latest -f build/linux/Dockerfile .
 	@docker run --rm -v $$(pwd)/bin/linux:/export wastetags:latest cp /wastetags /export/
 	@cp $(CONFIG_DIR)/linux.json $(BINARY_DIR)/linux/config.json
-	@cp $(DATA_FILE) $(BINARY_DIR)/linux/chemicals.sqlite3
+	@cp $(BUILD_DIR)/linux/wastetags.service $(BINARY_DIR)/linux/wastetags.service
 	@echo "Linux build complete. Files located in $(BINARY_DIR)/linux"
+
+push-linux: clean linux
+	@scp -r $(BINARY_DIR)/linux $(USER):/tmp/linux
+	@scp $(DATA_FILE) $(USER):/tmp/linux
+	@ssh $(USER) 'sudo mv /tmp/linux/wastetags /usr/local/bin/ && \
+	sudo mv /tmp/linux/config.json /etc/wastetags/ && \
+	sudo mv /tmp/linux/chemicals.sqlite3 /var/lib/wastetags/ && \
+	sudo rm -rf /tmp/linux && \
+	sudo systemctl restart wastetags'
+	@echo "Push complete. Files moved to final destinations on remote server."
 
 # Build for macOS
 mac: BUILD_TYPE := macos
