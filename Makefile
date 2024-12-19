@@ -1,54 +1,74 @@
 # Variables
 BINARY_NAME := wastetags
 BINARY_DIR := bin
-BINARY_PATH := $(BINARY_DIR)/$(BINARY_NAME)
-CMD_DIR := cmd/$(BINARY_NAME)
-SRC_FILES := $(wildcard $(CMD_DIR)/*.go)
-DOCKER_COMPOSE_DIR := deployments
-DOCKER_COMPOSE_FILE := $(DOCKER_COMPOSE_DIR)/docker-compose.yml
+CONFIG_DIR := configs
+DATA_FILE := data/chemicals.sqlite3
 
 # Default target
-all: build
+all: linux
 
-# Build the binary
-build: clean
-	@echo "Building the project..."
-	@mkdir -p $(BINARY_DIR)
-	@go build -ldflags="-s -w" -o $(BINARY_PATH) $(SRC_FILES)
-	@echo "Build complete. Binary located at $(BINARY_PATH)"
+# Build for Linux
+linux: BUILD_TYPE := linux
+linux: BINARY_PATH := $(BINARY_DIR)/linux/$(BINARY_NAME)
+linux:
+	@echo "Building for Linux..."
+	@mkdir -p $(BINARY_DIR)/linux
+	@docker build -t wastetags:latest -f build/linux/Dockerfile .
+	@docker run --rm -v $$(pwd)/bin/linux:/export wastetags:latest cp /wastetags /export/
+	@cp $(CONFIG_DIR)/linux.json $(BINARY_DIR)/linux/config.json
+	@cp $(DATA_FILE) $(BINARY_DIR)/linux/chemicals.sqlite3
+	@echo "Linux build complete. Files located in $(BINARY_DIR)/linux"
 
-# scp /Users/main/Projects/Go/wastetags/bin/pi/wastetags pi.local:~
-# scp /Users/main/Projects/Go/wastetags/bin/pi/config.json pi.local:~
-# scp /Users/main/Projects/Go/wastetags/bin/pi/chemicals.sqlite3 pi.local:~
-# scp /Users/main/Projects/Go/wastetags/bin/pi/wastetags.service pi.local:~
-pi: clean
-	@echo "Building for Raspberry Pi..."
-	@mkdir -p $$(pwd)/bin/pi
-	@docker build -t wastetags:latest -f build/pi/Dockerfile .
-	@docker run --rm -v $$(pwd)/bin/pi:/export wastetags:latest cp /wastetags /export/
-	@cp $$(pwd)/data/chemicals.sqlite3 $$(pwd)/bin/pi/chemicals.sqlite3
-	@cp $$(pwd)/build/pi/wastetags.service $$(pwd)/bin/pi/wastetags.service
-	@cp $$(pwd)/build/pi/config.json $$(pwd)/bin/pi/config.json
+# Build for macOS
+mac: BUILD_TYPE := macos
+mac: BINARY_PATH := $(BINARY_DIR)/macos/$(BINARY_NAME)
+mac:
+	@echo "Building for macOS..."
+	@mkdir -p $(BINARY_DIR)/macos
+	@go build -ldflags="-s -w" -o $(BINARY_PATH) cmd/$(BINARY_NAME)/*.go
+	@cp $(CONFIG_DIR)/macos.json $(BINARY_DIR)/macos/config.json
+	@cp $(DATA_FILE) $(BINARY_DIR)/macos/chemicals.sqlite3
+	@echo "macOS build complete. Files located in $(BINARY_DIR)/macos"
 
-# Run the application
-run: build
-	@echo "Running the application..."
-	@$(BINARY_PATH)
+# Build for dev
+dev: BUILD_TYPE := dev
+dev: BINARY_PATH := $(BINARY_DIR)/dev/$(BINARY_NAME)
+dev:
+	@echo "Building for dev..."
+	@mkdir -p $(BINARY_DIR)/dev
+	@go build -ldflags="-s -w" -o $(BINARY_PATH) cmd/$(BINARY_NAME)/*.go
+	@cp $(CONFIG_DIR)/dev.json $(BINARY_DIR)/dev/config.json
+	@echo "dev build complete. Files located in $(BINARY_DIR)/dev"
+
+# Run the application for a specific build
+run-linux:
+	@echo "Running Linux build..."
+	@$(BINARY_DIR)/linux/$(BINARY_NAME) --config=$(BINARY_DIR)/linux/config.json
+
+run-mac:
+	@echo "Running macOS build..."
+	@$(BINARY_DIR)/macos/$(BINARY_NAME) --config=$(BINARY_DIR)/macos/config.json
+
+run-dev:
+	@echo "Running dev build..."
+	@$(BINARY_DIR)/dev/$(BINARY_NAME) --config=$(BINARY_DIR)/dev/config.json
 
 # Clean build artifacts
 clean:
-	@echo "Cleaning build artifacts..."
+	@echo "Cleaning all build artifacts..."
 	@rm -rf $(BINARY_DIR)
-	@mkdir -p $(BINARY_DIR)
 	@echo "Clean complete."
 
 # Help command to display available targets
 help:
 	@echo "Makefile commands:"
-	@echo "  make              - Builds the project"
-	@echo "  make build        - Builds the project"
-	@echo "  make run          - Runs the application"
-	@echo "  make clean        - Cleans build artifacts"
-	@echo "  make help         - Displays this help message"
+	@echo "  make linux         - Builds the project for Linux"
+	@echo "  make mac           - Builds the project for macOS"
+	@echo "  make dev       	- Builds the project for dev"
+	@echo "  make run-linux     - Runs the Linux build"
+	@echo "  make run-mac       - Runs the macOS build"
+	@echo "  make run-dev  		- Runs the dev build"
+	@echo "  make clean         - Cleans all build artifacts"
+	@echo "  make help          - Displays this help message"
 
-.PHONY: all build run clean test deps fmt lint generate docker-up docker-down docker-build-no-cache docker-logs help
+.PHONY: all linux mac dev run-linux run-mac run-dev clean help

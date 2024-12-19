@@ -12,6 +12,7 @@ import (
 	"os"
 
 	"github.com/williamveith/wastetags/pkg/database"
+	"github.com/williamveith/wastetags/pkg/idgen"
 
 	"github.com/gin-gonic/gin"
 )
@@ -26,11 +27,15 @@ var embeddedStylesFS embed.FS
 //go:embed query/*
 var sqlFS embed.FS
 
-var db *database.Database
-
 type Config struct {
 	DatabasePath string `json:"database_path"`
 }
+
+var (
+	db          *database.Database
+	idGenerator = idgen.GenerateID()
+	cfg         *Config
+)
 
 func loadConfig(path string) (*Config, error) {
 	f, err := os.Open(path)
@@ -50,6 +55,42 @@ func loadConfig(path string) (*Config, error) {
 	}
 
 	return &cfg, nil
+}
+
+func init() {
+	// Add command-line flags for config file and build type
+	configPath := flag.String("config", "", "Path to the config file")
+	buildType := flag.String("build", "linux", "Build type (e.g., linux, macos, dev)")
+	flag.Parse()
+
+	// Determine config path based on build type
+	if *configPath == "" {
+		switch *buildType {
+		case "linux":
+			*configPath = "./configs/linux.json"
+		case "macos":
+			*configPath = "./configs/macos.json"
+		case "testing":
+			*configPath = "./configs/dev.json"
+		default:
+			log.Fatalf("Unknown build type: %s", *buildType)
+		}
+	}
+
+	// Load configuration
+	var err error
+	cfg, err = loadConfig(*configPath)
+	if err != nil {
+		log.Fatalf("Error loading config file: %v", err)
+	}
+
+	// Initialize database
+	sqlStatement := readSql("query/schema.sql")
+	if sqlStatement == nil {
+		log.Fatalf("Failed to read schema.sql, cannot initialize database")
+	}
+
+	db = database.NewDatabase(cfg.DatabasePath, sqlStatement)
 }
 
 func readSql(filePath string) []byte {
@@ -89,23 +130,6 @@ func addCurrentPathMiddleware() gin.HandlerFunc {
 }
 
 func main() {
-	// Add a command-line flag for the config file.
-	configPath := flag.String("config", "/etc/wastetags/config.json", "Path to the config file")
-	flag.Parse()
-
-	// Load configuration
-	cfg, err := loadConfig(*configPath)
-	if err != nil {
-		log.Fatalf("Error loading config file: %v", err)
-	}
-
-	sqlStatement := readSql("query/schema.sql")
-	if sqlStatement == nil {
-		log.Fatalf("Failed to read schema.sql, cannot initialize database")
-	}
-
-	db = database.NewDatabase(cfg.DatabasePath, sqlStatement)
-
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 

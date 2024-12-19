@@ -1,15 +1,12 @@
 package main
 
 import (
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"html/template"
 	"net/http"
-	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"github.com/williamveith/wastetags/pkg/qrcodegen"
 )
 
@@ -42,7 +39,7 @@ func (qrCodeData *QRCodeData) generateDataUri() (string, string) {
 }
 
 func (qrCodeData *QRCodeData) makeCopy() (string, string, string) {
-	qrCodeData.WasteTags[0] = generateShortUUID(len(qrCodeData.WasteTags[0]))
+	qrCodeData.WasteTags[0] = idGenerator()
 	dataURI, jsonContent := qrCodeData.generateDataUri()
 	return dataURI, jsonContent, qrCodeData.WasteTags[0]
 }
@@ -59,16 +56,6 @@ func convertMapToQRCodeData(dataMap map[string]interface{}) (*QRCodeData, error)
 	}
 
 	return &qrCodeData, nil
-}
-
-func generateShortUUID(length int) string {
-	rawUUID := uuid.New()
-	base64Encoded := base64.StdEncoding.EncodeToString(rawUUID[:])
-	base64Clean := strings.NewReplacer("+", "", "/", "", "=", "").Replace(base64Encoded)
-	if length > len(base64Clean) {
-		length = len(base64Clean)
-	}
-	return base64Clean[:length]
 }
 
 func MakeNewQRCode(c *gin.Context) {
@@ -113,7 +100,7 @@ func MakeWasteTag(c *gin.Context) (string, gin.H) {
 		"physState": c.PostForm("physState"),
 	}
 
-	wasteTag := generateShortUUID(20)
+	wasteTag := idGenerator()
 	sqlStatement := readSql("query/get_rows_by_col_value.sql")
 	components, err := db.GetRowsByColumnValue("mixtures", sqlStatement, "chem_name", values["chemName"])
 	if err != nil {
