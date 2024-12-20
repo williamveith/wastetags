@@ -1,5 +1,5 @@
 .*
+*.sqlite3
 !.gitignore
-!.gitattributes
 bin/*
 setup/*

@@ -27,6 +27,10 @@ var embeddedStylesFS embed.FS
 //go:embed query/*
 var sqlFS embed.FS
 
+//go:embed data/*
+//go:exclude data/.* data/.*/**
+var embeddedData embed.FS
+
 type Config struct {
 	DatabasePath string `json:"database_path"`
 }
@@ -91,6 +95,8 @@ func init() {
 	}
 
 	db = database.NewDatabase(cfg.DatabasePath, sqlStatement)
+
+	db.ImportFromProtobuff(embeddedData)
 }
 
 func readSql(filePath string) []byte {

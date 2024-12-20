@@ -1,0 +1,79 @@
+
+
+Poly BottlePB
+
+Aerosol CansAC
+	
+BagBA
+	
+BinBN
+
+	BatteriesBT
+	
+BOXBX
+
+Carton FiberCF
+
+	Fiber BoxCF
+
+Container GlassCG
+
+Carton MetalCM
+
+Container MetalCM
+
+Carton WoodCW
+
+	CylindersCY
+
+
+Drum FiberDF
+
+Drum Poly ClosedDF
+
+Drum Poly OpenDF
+
+
+Drum MetalDM
+
+Drum Metal ClosedDM
+
+Drum Metal OpenDM
+
+	Drum PolyDP
+
+Dump TrailerDR
+
+
+Dump truckDT
+
+	Drum WoodDW
+
+Glass BottleGB
+
+Hopper or Gondola CarHG
+
+Jug PlasticJP
+
+Portable ToteMe
+
+
+NoneNO
+
+PalletPA
+
+Pail Metal (poly lined)PL
+
+
+Pail MetalPM
+
+	Pail PolyPP
+
+Roll-Off BoxRB
+
+Tank carTC
+
+Tank portableTP
+
+
+Tank truckTT

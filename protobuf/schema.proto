@@ -1,0 +1,61 @@
+// protoc --go_out=. protobuf/schema.proto
+syntax = "proto3";
+
+package database;
+
+option go_package = "pkg/database";
+
+message Chemical {
+    string cas = 1 [json_name = "cas"];
+    string chem_name = 2 [json_name = "chem_name"];
+}
+
+message ChemicalList {
+    repeated Chemical chemical = 1;
+}
+
+message Mixture {
+    string chem_name = 1 [json_name = "chem_name"];
+    string component_name = 2 [json_name = "component_name"];
+    string cas = 3 [json_name = "cas"];
+    string percent = 4 [json_name = "percent"];
+    int32 component_order = 5 [json_name = "component_order"];
+}
+
+message MixtureList {
+    repeated Mixture mixture = 1;
+}
+
+message Location {
+    string location = 1 [json_name = "location"];
+}
+
+message LocationList {
+    repeated Location location = 1;
+}
+
+message Container {
+    string name = 1 [json_name = "name"];
+    string abbreviation = 2 [json_name = "abbreviation"];
+}
+
+message ContainerList {
+    repeated Container container = 1;
+}
+
+message Unit {
+    string name = 1 [json_name = "name"];
+    string abbreviation = 2 [json_name = "abbreviation"];
+}
+
+message UnitList {
+    repeated Unit unit = 1;
+}
+
+message State {
+    string state = 1 [json_name = "state"];
+}
+
+message StateList {
+    repeated State state = 1;
+}

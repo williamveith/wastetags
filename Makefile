@@ -10,6 +10,11 @@ DOCKERFILE := $(BUILD_DIR)/Dockerfile
 DATA_FILE := data/chemicals.sqlite3
 USER := pi.local
 
+# Go binary metadata
+VERSION := $(git describe --tags --abbrev=0)
+BUILDTIME := "$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+COMMITHASH := $(git rev-parse HEAD)
+
 # Default target
 all: linux
 
@@ -34,9 +39,11 @@ linux:
 	@cp $(BUILD_DIR)/$(BUILD_TYPE)/$(BINARY_NAME).service $(BINARY_DIR)/$(BINARY_NAME).service
 	@echo "$(BUILD_TYPE) build complete. Files located in $(BINARY_DIR)"
 
+push-linux: BUILD_TYPE := linux
+push-linux: BINARY_DIR := $(BINARY_ROOT_DIR)/$(BUILD_TYPE)
 push-linux: clean linux
-	@scp -r $(BINARY_ROOT_DIR)/linux $(USER):/tmp/linux
-	@scp $(DATA_FILE) $(USER):/tmp/linux
+	@scp -r $(BINARY_DIR) $(USER):/tmp/$(BUILD_TYPE)
+	@scp $(DATA_FILE) $(USER):/tmp/$(BUILD_TYPE)
 	@ssh $(USER) 'sudo mv /tmp/linux/wastetags /usr/local/bin/ && \
 	sudo mv /tmp/linux/config.json /etc/wastetags/ && \
 	sudo mv /tmp/linux/chemicals.sqlite3 /var/lib/wastetags/ && \
