@@ -24,10 +24,10 @@ var embeddedTemplatesFS embed.FS
 //go:exclude assets/.* assets/.*/**
 var embeddedStylesFS embed.FS
 
-//go:embed query/*
+//go:embed query/*.sql
 var sqlFS embed.FS
 
-//go:embed data/*
+//go:embed data/*.bin
 //go:exclude data/.* data/.*/**
 var embeddedData embed.FS
 
