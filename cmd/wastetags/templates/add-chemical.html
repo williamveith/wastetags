@@ -2,9 +2,9 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" href="/static/assets/images/favicon.png" />
-    <link rel="stylesheet" href="/static/assets/css/add-chemical.css" />
-    <link rel="stylesheet" href="/static/assets/css/general.css" />
+    <link rel="icon" href="/static/images/favicon.png" />
+    <link rel="stylesheet" href="/static/css/add-chemical.css" />
+    <link rel="stylesheet" href="/static/css/general.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Waste Label Maker</title>
   </head>
@@ -89,13 +89,13 @@
       });
     </script>
     <script type="module">
-      import { onlyNumberDigitsAllowed } from "/static/assets/js/input-validators.js";
+      import { onlyNumberDigitsAllowed } from "/static/js/input-validators.js";
       Array.from(document.getElementsByClassName("cas")).forEach(
         (element, index) => {
           element.addEventListener("input", onlyNumberDigitsAllowed);
         }
       );
     </script>
-    <script src="/static/assets/js/arrow-navigation.js"></script>
+    <script src="/static/js/arrow-navigation.js"></script>
   </body>
 </html>

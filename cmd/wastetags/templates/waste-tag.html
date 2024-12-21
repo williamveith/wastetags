@@ -2,8 +2,8 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" href="/static/assets/images/favicon.png" />
-    <link rel="stylesheet" href="/static/assets/css/waste-tag.css" />
+    <link rel="icon" href="/static/images/favicon.png" />
+    <link rel="stylesheet" href="/static/css/waste-tag.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Waste Label Maker</title>
   </head>
@@ -14,7 +14,7 @@
       <input id="numberOfCopies" type="text" value="1" />
       <button onclick="window.print()">Print Tag</button>
     </div>
-    <div id="wasteTag-1" class="label">
+    <div class="label">
       <div class="qr-code">
         <img id="qrCodeDataUri" src="{{.QrCodeBase64}}" alt="QR Code" />
         <input type="hidden" id="qrCodeValue" value="{{ .QRCodeValue }}" />
@@ -45,73 +45,18 @@
       </div>
     </div>
     {{ template "component-footer.html" . }}
-    <script>
-      function updateQrCode(clonedLabel, newInfo) {
-        clonedLabel.querySelector("#qrCodeDataUri").src = newInfo["dataURI"];
-        clonedLabel.querySelector("#qrCodeValue").value =
-          newInfo["jsonContent"];
-        const detailsElement = clonedLabel.querySelector(".details");
-        const idMatch = detailsElement.textContent.match(/ID:\s*([^\s]+)/);
-        if (idMatch) {
-          detailsElement.innerHTML = detailsElement.innerHTML.replace(
-            idMatch[1],
-            newInfo["wasteTag"]
-          );
-        }
-      }
-
-      const numberOfCopies = async (event) => {
-        const desiredNumberOfCopies = parseInt(event.target.value, 10);
-        if (desiredNumberOfCopies >= 1) {
-          const tagElements = Array.from(
-            document.getElementsByClassName("label")
-          );
-          const changeInNumberOfCopies =
-            desiredNumberOfCopies - tagElements.length;
-
-          if (changeInNumberOfCopies < 0) {
-            while (tagElements.length > desiredNumberOfCopies) {
-              tagElement = tagElements.pop();
-              tagElement.remove();
-            }
-          }
-
-          for (let i = 0; i < changeInNumberOfCopies; i++) {
-            const clonedTag = tagElements[0].cloneNode(true);
-
-            try {
-              const response = await fetch("/api/generate-qrcode", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json"
-                },
-                body: tagElements[0].querySelector("#qrCodeValue").value
-              });
-
-              if (!response.ok) {
-                throw new Error("Failed to generate QR code");
-              }
-
-              const result = await response.json();
-              updateQrCode(clonedTag, result);
-              tagElements[0].after(clonedTag);
-            } catch (error) {
-              console.error("Error:", error);
-              alert("Error generating QR code");
-            }
-          }
-        }
-      };
+    <script type="module">
+      import { numberOfCopies } from "/static/js/qr-code-api.js";
       document
         .getElementById("numberOfCopies")
         .addEventListener("input", numberOfCopies);
     </script>
     <script type="module">
-      import { onlyNumbersAllowed } from "/static/assets/js/input-validators.js";
+      import { onlyNumbersAllowed } from "/static/js/input-validators.js";
       document
         .getElementById("numberOfCopies")
         .addEventListener("input", onlyNumbersAllowed);
     </script>
-    <script src="/static/assets/js/arrow-navigation.js"></script>
+    <script src="/static/js/arrow-navigation.js"></script>
   </body>
 </html>

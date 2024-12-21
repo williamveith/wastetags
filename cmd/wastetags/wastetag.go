@@ -101,7 +101,7 @@ func MakeWasteTag(c *gin.Context) (string, gin.H) {
 	}
 
 	wasteTag := idGenerator()
-	sqlStatement := readSql("query/get_rows_by_col_value.sql")
+	sqlStatement := readEmbeddedFile("query/get_rows_by_col_value.sql")
 	components, err := db.GetRowsByColumnValue("mixtures", sqlStatement, "chem_name", values["chemName"])
 	if err != nil {
 		fmt.Println("Error retrieving components:", err)

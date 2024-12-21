@@ -14,7 +14,7 @@ func MakeWasteTagForm(c *gin.Context) (string, gin.H) {
 		return "error.html", genericErrorMessage
 	}
 
-	sqlStatement := readSql("query/get_distinct_col_values.sql")
+	sqlStatement := readEmbeddedFile("query/get_distinct_col_values.sql")
 	components, err := db.GetColumnValues("mixtures", sqlStatement, "chem_name")
 	if err != nil {
 		fmt.Println("Error retrieving components:", err)

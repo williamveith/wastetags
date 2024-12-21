@@ -4,32 +4,27 @@ import (
 	"embed"
 	"encoding/json"
 	"flag"
-	"fmt"
 	"html/template"
-	"io"
+	"io/fs"
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
+	"runtime"
 
 	"github.com/williamveith/wastetags/pkg/database"
+	"github.com/williamveith/wastetags/pkg/errors"
 	"github.com/williamveith/wastetags/pkg/idgen"
 
 	"github.com/gin-gonic/gin"
 )
 
-//go:embed templates/*.html
-var embeddedTemplatesFS embed.FS
-
-//go:embed assets/*
-//go:exclude assets/.* assets/.*/**
-var embeddedStylesFS embed.FS
-
-//go:embed query/*.sql
-var sqlFS embed.FS
-
+//go:embed assets/css/*.css assets/js/*.js assets/images/*.png
+//go:embed configs/*.json
 //go:embed data/*.bin
-//go:exclude data/.* data/.*/**
-var embeddedData embed.FS
+//go:embed query/*.sql
+//go:embed templates/*.html
+var embeddedFS embed.FS
 
 type Config struct {
 	DatabasePath string `json:"database_path"`
@@ -37,75 +32,34 @@ type Config struct {
 
 var (
 	db          *database.Database
-	idGenerator = idgen.GenerateID()
 	cfg         *Config
+	idGenerator = idgen.GenerateID()
 )
 
-func loadConfig(path string) (*Config, error) {
-	f, err := os.Open(path)
-	if err != nil {
-		return nil, fmt.Errorf("could not open config file: %w", err)
-	}
-	defer f.Close()
+func loadConfig() *Config {
+	configPath := flag.String("config", "", "Path to the config file")
+	devMode := flag.Bool("dev", false, "Run in dev mode")
+	flag.Parse()
 
-	bytes, err := io.ReadAll(f)
-	if err != nil {
-		return nil, fmt.Errorf("could not read config file: %w", err)
+	var configs []byte
+	if *devMode {
+		configs = readEmbeddedFile(filepath.Join("configs", "dev.json"))
+	} else if *configPath == "" {
+		configs = readEmbeddedFile(filepath.Join("configs", runtime.GOOS) + ".json")
+	} else {
+		configs = errors.Must(os.ReadFile(*configPath))
 	}
 
 	var cfg Config
-	if err := json.Unmarshal(bytes, &cfg); err != nil {
-		return nil, fmt.Errorf("could not parse config file: %w", err)
+	if err := json.Unmarshal(configs, &cfg); err != nil {
+		log.Fatalf("could not parse config file: %v", err)
 	}
 
-	return &cfg, nil
+	return &cfg
 }
 
-func init() {
-	// Add command-line flags for config file and build type
-	configPath := flag.String("config", "", "Path to the config file")
-	buildType := flag.String("build", "linux", "Build type (e.g., linux, macos, dev)")
-	flag.Parse()
-
-	// Determine config path based on build type
-	if *configPath == "" {
-		switch *buildType {
-		case "linux":
-			*configPath = "./configs/linux.json"
-		case "macos":
-			*configPath = "./configs/macos.json"
-		case "testing":
-			*configPath = "./configs/dev.json"
-		default:
-			log.Fatalf("Unknown build type: %s", *buildType)
-		}
-	}
-
-	// Load configuration
-	var err error
-	cfg, err = loadConfig(*configPath)
-	if err != nil {
-		log.Fatalf("Error loading config file: %v", err)
-	}
-
-	// Initialize database
-	sqlStatement := readSql("query/schema.sql")
-	if sqlStatement == nil {
-		log.Fatalf("Failed to read schema.sql, cannot initialize database")
-	}
-
-	db = database.NewDatabase(cfg.DatabasePath, sqlStatement)
-
-	db.ImportFromProtobuff(embeddedData)
-}
-
-func readSql(filePath string) []byte {
-	schema, schemaerror := sqlFS.ReadFile(filePath)
-	if schemaerror != nil {
-		fmt.Println("Failed to read embedded schema:", schemaerror)
-		return nil
-	}
-	return schema
+func readEmbeddedFile(filePath string) []byte {
+	return errors.Must(embeddedFS.ReadFile(filePath))
 }
 
 func redirectHandler(path string) gin.HandlerFunc {
@@ -135,17 +89,35 @@ func addCurrentPathMiddleware() gin.HandlerFunc {
 	}
 }
 
+func init() {
+	// Load configuration
+	cfg = loadConfig()
+
+	// Initialize database
+	sqlStatement := readEmbeddedFile("query/schema.sql")
+	db = database.NewDatabase(cfg.DatabasePath, sqlStatement)
+	dataFS := errors.Must(fs.Sub(embeddedFS, "data"))
+	db.ImportFromProtobuff(dataFS)
+}
+
 func main() {
+	// Engine
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 
-	tmpl, _ := template.ParseFS(embeddedTemplatesFS, "templates/*")
+	// Embedded Assets
+	tmpl, _ := template.ParseFS(embeddedFS, "templates/*.html")
 	r.SetHTMLTemplate(tmpl)
-	r.StaticFS("/static", http.FS(embeddedStylesFS))
+	staticFS := errors.Must(fs.Sub(embeddedFS, "assets"))
+	r.StaticFS("/static", http.FS(staticFS))
 
+	// Middleware
 	r.Use(addCurrentPathMiddleware())
 
+	// Redirects
 	r.GET("/", redirectHandler("/home"))
+
+	// Page Routes
 	r.GET("/home", pageHandler(HomePage))
 	r.GET("/waste-tag-form", pageHandler(MakeWasteTagForm))
 	r.POST("/waste-tag", pageHandler(MakeWasteTag))
@@ -153,6 +125,10 @@ func main() {
 	r.POST("/add-chemical", pageHandler(AddChemical))
 	r.GET("/add-mixture", pageHandler(AddMixture))
 	r.POST("/add-mixture", pageHandler(AddMixture))
-	r.POST("/api/generate-qrcode", MakeNewQRCode)
+
+	// API Routes
+	r.POST("/api/generate-qr-code", MakeNewQRCode)
+
+	// Start HTTP Server
 	r.Run(":8080")
 }

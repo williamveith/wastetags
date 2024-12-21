@@ -10,7 +10,7 @@ import (
 
 func AddChemical(c *gin.Context) (string, gin.H) {
 	if c.Request.Method == http.MethodPost {
-		sqlStatement := readSql("query/insert_chemical.sql")
+		sqlStatement := readEmbeddedFile("query/insert_chemical.sql")
 		casNumber := fmt.Sprintf("%s-%s-%s", strings.TrimSpace(c.PostForm("cas1")), strings.TrimSpace(c.PostForm("cas2")), strings.TrimSpace(c.PostForm("cas3")))
 		values := [][]string{
 			{casNumber, strings.TrimSpace(c.PostForm("chemical-name"))},

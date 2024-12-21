@@ -1,8 +1,9 @@
 package database
 
 import (
-	"embed"
 	"fmt"
+	"io"
+	"io/fs"
 	"log"
 	"strings"
 	"unicode"
@@ -181,7 +182,7 @@ func (cdb *Database) FromProtobuf(tableName string, protoItemType proto.Message,
 	return nil
 }
 
-func (cdb *Database) ImportFromProtobuff(embeddedData embed.FS) {
+func (cdb *Database) ImportFromProtobuff(embeddedData fs.FS) {
 	// Define the tables and their corresponding Protobuf types
 	// Replace Chemical, ChemicalList, etc. with your actual generated types.
 	tableMappings := []struct {
@@ -199,15 +200,21 @@ func (cdb *Database) ImportFromProtobuff(embeddedData embed.FS) {
 
 	// Loop through each table and import its data from Protobuf
 	for _, mapping := range tableMappings {
-		inputFile, err := embeddedData.ReadFile("data/" + mapping.name + ".bin")
+		inputFile, err := embeddedData.Open(mapping.name + ".bin")
+		if err != nil {
+			log.Fatalf("Failed to open input file for table %s: %v", mapping.name, err)
+		}
+
+		data, err := io.ReadAll(inputFile)
 		if err != nil {
 			log.Fatalf("Failed to read input file for table %s: %v", mapping.name, err)
 		}
+
 		err = cdb.FromProtobuf(
 			mapping.name,        // Table name
 			mapping.message,     // Single-row Protobuf message
 			mapping.listMessage, // List Protobuf message
-			inputFile,           // Input file data
+			data,                // Input file data
 		)
 		if err != nil {
 			log.Fatalf("Failed to import table %s: %v", mapping.name, err)

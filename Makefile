@@ -1,6 +1,5 @@
 # Root Directories
 BINARY_ROOT_DIR := bin
-CONFIG_DIR := configs
 BUILD_DIR := build
 BUILD_LOG_DIR := $(BINARY_ROOT_DIR)/logs
 
@@ -35,7 +34,6 @@ linux:
 		-t $(DOCKER_IMAGE) \
 		-f $(DOCKERFILE) .
 	@docker run --rm -v $$(pwd)/$(BINARY_DIR):/export $(DOCKER_IMAGE) cp /$(BINARY_NAME) /export/
-	@cp $(CONFIG_DIR)/$(BUILD_TYPE).json $(BINARY_DIR)/config.json
 	@cp $(BUILD_DIR)/$(BUILD_TYPE)/$(BINARY_NAME).service $(BINARY_DIR)/$(BINARY_NAME).service
 	@echo "$(BUILD_TYPE) build complete. Files located in $(BINARY_DIR)"
 
@@ -61,7 +59,6 @@ mac:
 	@mkdir -p $(BINARY_DIR)
 	@mkdir -p $(BUILD_LOG_DIR)
 	@go build -v -gcflags="all=-N -l" -x -ldflags="-s -w" -o $(BINARY_PATH) cmd/$(BINARY_NAME)/*.go > $(BUILD_LOG_DIR)/$(BUILD_TYPE).log 2>&1
-	@cp $(CONFIG_DIR)/$(BUILD_TYPE).json $(BINARY_DIR)/config.json
 	@cp $(BUILD_DIR)/$(BUILD_TYPE)/iconfile.icns $(BINARY_DIR)/iconfile.icns
 	@cp $(BUILD_DIR)/$(BUILD_TYPE)/Info.plist $(BINARY_DIR)/Info.plist
 	@echo "$(BUILD_TYPE) build complete. Files located in $(BINARY_DIR)"
@@ -75,7 +72,6 @@ dev:
 	@mkdir -p $(BINARY_DIR)
 	@mkdir -p $(BUILD_LOG_DIR)
 	@go build -v -gcflags="all=-N -l" -x -ldflags="-s -w" -o $(BINARY_PATH) cmd/$(BINARY_NAME)/*.go > $(BUILD_LOG_DIR)/$(BUILD_TYPE).log 2>&1
-	@cp $(CONFIG_DIR)/$(BUILD_TYPE).json $(BINARY_DIR)/config.json
 	@echo "$(BUILD_TYPE) build complete. Files located in $(BINARY_DIR)"
 
 # Run the application for a specific build
@@ -84,7 +80,7 @@ run-linux:
 	@echo "Running $(BUILD_TYPE) build..."
 	@$(BINARY_ROOT_DIR)/$(BUILD_TYPE)/$(BINARY_NAME) --config=$(BINARY_ROOT_DIR)/$(BUILD_TYPE)/config.json
 
-run-linux: BUILD_TYPE := darwin
+run-mac: BUILD_TYPE := darwin
 run-mac:
 	@echo "Running $(BUILD_TYPE) build..."
 	@$(BINARY_ROOT_DIR)/$(BUILD_TYPE)/$(BINARY_NAME) --config=$(BINARY_ROOT_DIR)/$(BUILD_TYPE)/config.json
@@ -92,7 +88,7 @@ run-mac:
 run-dev: BUILD_TYPE := dev
 run-dev:
 	@echo "Running $(BUILD_TYPE) build..."
-	@$(BINARY_ROOT_DIR)/$(BUILD_TYPE)/$(BINARY_NAME) --config=$(BINARY_ROOT_DIR)/$(BUILD_TYPE)/config.json
+	@$(BINARY_ROOT_DIR)/$(BUILD_TYPE)/$(BINARY_NAME) --$(BUILD_TYPE)
 
 # Clean build artifacts
 clean:
