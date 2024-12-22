@@ -2,88 +2,282 @@
 
 The Waste Tagging System is a web application designed to streamline the process of creating and managing waste labels. It provides a user-friendly interface for adding new chemicals, creating mixtures, and generating QR-code-enhanced labels for containers containing hazardous or non-hazardous waste. This system helps ensure regulatory compliance, improves inventory tracking, and simplifies waste disposal management workflows.
 
+## 🗂️ Table of Contents
+
+1. [Features](#features)
+2. [Requirements](#requirements)
+3. [Installation & Build](#installation--build)
+4. [Configuration](#configuration)
+5. [Database Management](#database-management)
+6. [Routes & Handlers](#routes--handlers)
+7. [UI Overview](#ui-overview)
+8. [Usage Flow](#usage-flow)
+
+---
+
 ## Features
 
-- **Add New Chemical**: Enter CAS numbers and chemical names through a guided form. The application validates CAS numbers to ensure data integrity.
-- **Add Mixture**: Combine individual chemicals to form a mixture. Each mixture entry can be reused when generating waste labels.
-- **Generate Waste Labels**: Create and print waste tags that include:
-  - Unique QR codes for each label.
-  - Information such as room number, generator name, chemical components, and their percentages.
-  - Multiple copies of labels with unique identifiers generated on the fly.
-- **Embedded Resources**: Comes with embedded HTML templates, CSS, and SQL schema. This makes deployment and configuration simpler.
-- **Scalable API**: Integrated endpoints for managing database entries and generating dynamic QR codes for labeling.
+- **Add Chemicals**: Input CAS number and chemical name to store in the database.  
+- **Add Mixtures**: Construct mixtures by combining multiple chemicals.  
+- **Waste Tag Generation**: Gather relevant information (location, container size, etc.) and generate a printable label with a QR code.  
+- **QR Code Data**: Encodes essential details of the waste tag, enabling scanning for future reference or inventory checks.  
+- **Embedded Assets**: All CSS, JavaScript, images, and SQL scripts are embedded in the Go binary, simplifying deployment.
 
-## Technology Stack
+---
 
-- **Backend**: Go (Golang) with [Gin](https://github.com/gin-gonic/gin) for routing and HTTP request handling.
-- **Database**: SQLite3 for local storage of chemicals, mixtures, locations, containers, units, and states.
-- **QR Code Generation**: Leveraging `github.com/williamveith/wastetags/pkg/qrcodegen` for creating data URIs from JSON payloads.
-- **Templates & Assets**: Embedded using Go’s `embed` package, making the application self-contained.
+## Requirements
 
-## Prerequisites
+- Go **1.19+** (or a version compatible with Go modules).  
+- (Optional) Protobuf tools if you plan to extend or regenerate the embedded data (but not necessary for normal usage).  
+- SQLite library is used under the hood by the **[go-sqlite3](https://github.com/mattn/go-sqlite3)** driver.
 
-- **Go (1.19+ recommended)**: Ensure [Go](https://go.dev/) is installed.
-- **SQLite3**: The database is automatically initialized from embedded SQL files. No separate installation required unless you want to inspect the database independently.
-- **Git**: If you plan on cloning the repository directly.
+---
 
-## Build The App
+## Installation & Build
 
-1. Clone the Repository
-2. Navigate to Project Directory
-3. Build the Project
+1. **Clone the Repository:**
 
-  ```sh
-  git clone https://github.com/yourusername/wastetags.git
-  cd wastetags
-  make build
-  ```
+   ```bash
+   git clone https://github.com/williamveith/wastetags.git
+   cd wastetags
+   ```
 
-## Use The App
+2. **Download Dependencies:**
 
-Double click the binary generated in the build located in the bin directory or use the make run command in the wastetags directory. The UI can be accessed at `http://localhost:8080`
+   ```bash
+   go mod tidy
+   ```
 
-From here, you can:
+3. **Build:**
 
-- Navigate to **Add Chemical**: `/addchemical`
-- Navigate to **Add Mixture**: `/add-mixture`
-- Navigate to **Create Tag**: `/waste-tag-form`
+   ```bash
+   go build -o wastetags
+   ```
 
-## Feature Details
+4. **Run:**
 
-1. **Adding a Chemical**:
-   - Go to `/addchemical`.
-   - Enter the CAS number in three parts (e.g., `64-17-5` for ethanol).
-   - Provide the chemical name.
-   - Click **Add Chemical**. The CAS number will be validated before submission.
+   ```bash
+   ./wastetags
+   ```
 
-2. **Adding a Mixture**:
-   - Go to `/add-mixture`.
-   - Specify a CAS number and name for your mixture (e.g., a solvent mixture).
-   - After submission, the mixture information can be used when creating waste tags.
+   Or:
 
-3. **Creating a Waste Tag**:
-   - Go to `/waste-tag-form`.
-   - Select the **Location**, **Chemical Name**, container details, and amount.
-   - Submit the form to generate a waste label with a QR code.
-   - Print the label by using your browser’s print functionality. You can also specify multiple copies and generate unique QR codes for each one.
+   ```bash
+   go run main.go
+   ```
 
-## Project Structure
+By default, the service listens on port **:8080**. Access the application in your browser at [http://localhost:8080](http://localhost:8080).
 
-- **`cmd/wastetags`**: Main application entry point.
-- **`pkg/database`**: Database interaction and initialization.
-- **`templates/`**: Embedded HTML templates for the user interface.
-- **`assets/`**: Embedded CSS styles and images for UI styling.
-- **`query/`**: Embedded SQL files for schema setup and queries.
-- **`Makefile`**: Build and run targets for the project.
-- **`Dockerfile` and `docker-compose.yml` (if present)**: For containerized deployment (adjust as needed).
+---
 
-## Customization & Configuration
+## Configuration
 
-- **Port**: The application runs by default on port `:8080`. Modify the `r.Run(":8080")` line in `runLabelMaker()` to change the port.
-- **Database Path**: The SQLite database defaults to `build/wastetags.sqlite3`. Modify the `init()` function in the code to point to a different database file if desired.
+Wastetags supports **two** ways to load config:
 
-## Troubleshooting
+1. **`--config` flag**: Provide a path to a custom JSON config.  
+2. **`--dev` flag**: Loads a `dev.json` config from the embedded `configs/` folder.  
 
-- **Schema Load Errors**: Ensure that the `query/schema.sql` file is present and can be read. The database initialization requires it.
-- **Permission Errors**: If running on a restricted environment, ensure the application has the necessary permissions to read embedded files and create the database file.
-- **CORS Issues**: Since the application is typically accessed from the same origin, CORS settings aren’t commonly needed. If deploying behind a reverse proxy or integrating with another frontend, you may need to configure CORS policies within Gin.
+These JSON configs typically include a `database_path`, which determines where the SQLite file resides. Example usage:
+
+```bash
+./wastetags --config /path/to/config.json
+```
+
+or
+
+```bash
+./wastetags --dev
+```
+
+If no flags are provided, the application attempts to load a config based on the OS (e.g., `configs/darwin.json`, `configs/windows.json`, etc.) or fails if not found.
+
+---
+
+## Database Management
+
+1. **Initialization**  
+   - On first run, Wastetags checks for the existence of your database file (`database_path` from config).  
+   - If not found, it creates and initializes one using the embedded `schema.sql`.  
+2. **Protobuf Import/Export**  
+   - Some tables can be populated from `.bin` files (Protobuf data). This occurs automatically when the database is first created (if `NeedsInitialization` is true).  
+3. **Schema**  
+   - Found in `query/schema.sql`. Contains table definitions for **chemicals**, **mixtures**, **locations**, **containers**, **units**, **states**, etc.
+
+---
+
+## Routes & Handlers
+
+Below is a summary of the key routes and their associated handlers:
+
+| **Route**              | **Method** | **Handler**          | **Description**                                                  |
+|------------------------|-----------:|----------------------|------------------------------------------------------------------|
+| `/home`                | GET        | `HomePage`           | Displays the main/home page.                                     |
+| `/waste-tag-form`      | GET        | `MakeWasteTagForm`   | Renders a form to gather details for generating a waste tag.     |
+| `/waste-tag`           | POST       | `MakeWasteTag`       | Processes form submission and produces a printable label.         |
+| `/add-chemical`        | GET, POST  | `AddChemical`        | Displays a chemical input form and inserts new records.          |
+| `/add-mixture`         | GET, POST  | `AddMixture`         | Displays a mixture input form and inserts new mixtures.          |
+| `/api/generate-qr-code`| POST       | `MakeNewQRCode`      | Returns a data URI for a new QR code with embedded JSON metadata. |
+
+Each handler typically reads an embedded SQL file from the `query/` directory, interacts with the database using the methods in `pkg/database/`, and passes data to or from the front-end forms.
+
+---
+
+## UI Overview
+
+All HTML templates are embedded in the Go binary (using `//go:embed`). These templates rely on partials (`component-navbar.html`, `component-footer.html`) for consistent site headers and footers.
+
+Below is a brief look at some core templates and their functions:
+
+### **add-chemical.html**
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    ...
+    <title>Add New Chemical</title>
+  </head>
+  <body>
+    {{ template "component-navbar.html" . }}
+    <h1>Add New Chemical</h1>
+    <form
+      id="addChemicalForm"
+      class="parent"
+      action="/add-chemical"
+      method="POST"
+      autocomplete="off">
+      <div class="content-div">
+        <label for="cas1">CAS Number:</label>
+        <input id="cas1" ... />
+        <span> - </span>
+        <input id="cas2" ... />
+        <span> - </span>
+        <input id="cas3" ... />
+      </div>
+      <div class="content-div">
+        <label for="chemical-name">Chemical Name:</label>
+        <input id="chemical-name" name="chemical-name" required />
+      </div>
+      <button type="submit">Add Chemical</button>
+    </form>
+    {{ template "component-footer.html" . }}
+    ...
+  </body>
+</html>
+```
+
+- **Purpose**: Gathers CAS number and chemical name.  
+- **Front-end Validation**: Basic checks via JS (e.g., digit-only inputs).
+
+### add-mixture.html
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    ...
+    <title>Add New Mixture</title>
+  </head>
+  <body>
+    {{ template "component-navbar.html" . }}
+    <h1>Add New Mixture</h1>
+    <h2>Still needs to be developed</h2>
+    {{ template "component-footer.html" . }}
+    ...
+  </body>
+</html>
+```
+
+- **Purpose**: (Work in progress) Allows creation of a mixture from multiple components.
+
+### **home.html**
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    ...
+    <title>Waste Label Maker</title>
+  </head>
+  <body>
+    {{ template "component-navbar.html" . }}
+    <h1>Welcome to the Waste Tagging System</h1>
+    <p>Use the navigation above to create tags & add new chemicals and mixtures</p>
+    {{ template "component-footer.html" . }}
+  </body>
+</html>
+```
+
+- **Purpose**: Landing page.
+
+### **waste-tag-form.html**
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    ...
+    <title>Generate Waste Label</title>
+  </head>
+  <body>
+    {{ template "component-navbar.html" . }}
+    <h1>Generate Waste Label</h1>
+    <form id="wasteTagForm" ...>
+      ...
+      <div class="div2">
+        <label for="chemName">Chemical Name</label>
+        <select id="chemName" name="chemName" required>
+          {{ range .Components }}
+          <option value="{{ .chem_name }}">{{ .chem_name }}</option>
+          {{ end }}
+        </select>
+      </div>
+      ...
+      <button type="submit">Generate Label</button>
+    </form>
+    {{ template "component-footer.html" . }}
+    ...
+  </body>
+</html>
+```
+
+- **Purpose**: The main user form to gather location, container type, physical state, and so on before generating a waste tag.
+
+### **waste-tag.html**
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    ...
+    <title>Waste Label Maker</title>
+  </head>
+  <body>
+    {{ template "component-navbar.html" . }}
+    <div class="tag-utilities">
+      <label for="numberOfCopies">Number Of Copies</label>
+      <input id="numberOfCopies" type="text" value="1" />
+      <button onclick="window.print()">Print Tag</button>
+    </div>
+    <div class="label">
+      <div class="qr-code">
+        <img id="qrCodeDataUri" src="{{.QrCodeBase64}}" alt="QR Code" />
+      </div>
+      ...
+    </div>
+    {{ template "component-footer.html" . }}
+    ...
+  </body>
+</html>
+```
+
+- **Purpose**: Displays the final waste label with a QR code, offering an option to print multiple copies.
+
+---
+
+## Usage Flow
+
+1. **Add Chemicals**: Navigate to **Add Chemical** → Provide CAS info and chemical name → Submit → Stored in the DB.  
+2. **Add Mixtures**: Navigate to **Add Mixture** → Provide mixture components → Submit.  
+3. **Generate Tag**: Navigate to **Create Tag** → Fill out the form → Submit → The system fetches details (like chemical composition) from the DB → Renders a label with a QR code and relevant info.  
+4. **Print**: Choose the number of copies → Print directly from the browser.
