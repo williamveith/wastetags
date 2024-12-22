@@ -27,15 +27,14 @@ linux:
 	@echo "Building for Linux..."
 	@mkdir -p $(BINARY_DIR)
 	@docker build \
-		--build-arg TARGETPLATFORM=$(BUILD_TYPE)/$(TARGET_ARCH) \
 		--build-arg TARGETOS=$(BUILD_TYPE) \
 		--build-arg TARGETARCH=$(TARGET_ARCH) \
 		--build-arg TARGETVARIANT=$(TARGET_VARIANT) \
 		-t $(DOCKER_IMAGE) \
 		-f $(DOCKERFILE) .
 	@docker run --rm -v $$(pwd)/$(BINARY_DIR):/export $(DOCKER_IMAGE) cp /$(BINARY_NAME) /export/
-	@cp $(BUILD_DIR)/$(BUILD_TYPE)/$(BINARY_NAME).service $(BINARY_DIR)/$(BINARY_NAME).service
-	@echo "$(BUILD_TYPE) build complete. Files located in $(BINARY_DIR)"
+	@cp -r $(BUILD_DIR)/$(BUILD_TYPE)/* $(BINARY_DIR)/
+	@echo "$(BUILD_TYPE) build complete. Files located in $$(pwd)/$(BINARY_DIR)"
 
 push-linux: BUILD_TYPE := linux
 push-linux: BINARY_DIR := $(BINARY_ROOT_DIR)/$(BUILD_TYPE)
@@ -43,7 +42,6 @@ push-linux: clean linux
 	@scp -r $(BINARY_DIR) $(USER):/tmp/$(BUILD_TYPE)
 	@scp $(DATA_FILE) $(USER):/tmp/$(BUILD_TYPE)
 	@ssh $(USER) 'sudo mv /tmp/linux/wastetags /usr/local/bin/ && \
-	sudo mv /tmp/linux/config.json /etc/wastetags/ && \
 	sudo mv /tmp/linux/chemicals.sqlite3 /var/lib/wastetags/ && \
 	sudo rm -rf /tmp/linux && \
 	sudo systemctl restart wastetags'

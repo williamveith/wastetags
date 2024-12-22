@@ -3,7 +3,7 @@ Description=WasteTags Service
 After=network.target
 
 [Service]
-ExecStart=/usr/local/bin/wastetags --config /etc/wastetags/config.json
+ExecStart=/usr/local/bin/wastetags
 
 # Ensure that systemd knows this is a simple service that does not fork.
 Type=simple
