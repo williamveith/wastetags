@@ -96,8 +96,10 @@ func init() {
 	// Initialize database
 	sqlStatement := readEmbeddedFile("query/schema.sql")
 	db = database.NewDatabase(cfg.DatabasePath, sqlStatement)
-	dataFS := errors.Must(fs.Sub(embeddedFS, "data"))
-	db.ImportFromProtobuff(dataFS)
+	if db.NeedsInitialization {
+		dataFS := errors.Must(fs.Sub(embeddedFS, "data"))
+		db.ImportFromProtobuff(dataFS)
+	}
 }
 
 func main() {

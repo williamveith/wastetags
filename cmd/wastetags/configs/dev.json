@@ -1,3 +1,3 @@
 {
-    "database_path": "data/chemicals.sqlite3"
+    "database_path": "build/wastetags.sqlite3"
 }

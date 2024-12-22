@@ -13,7 +13,7 @@ func TestToProtobuf(t *testing.T) {
 		DatabasePath string `json:"database_path"`
 	}
 	cfg := &Config{
-		DatabasePath: "/Users/main/Projects/Go/wastetags/data/chemicals.sqlite3",
+		DatabasePath: "/Users/main/Projects/Go/wastetags/build/wastetags.sqlite3",
 	}
 
 	sqlStatement, _ := os.ReadFile("/Users/main/Projects/Go/wastetags/cmd/wastetags/query/schema.sql")
@@ -22,7 +22,7 @@ func TestToProtobuf(t *testing.T) {
 	defer db.Close()
 
 	// Run the ToProtobuf function
-	outputFile := "mixtures.bin"
+	outputFile := "/Users/main/Projects/Go/wastetags/cmd/wastetags/data/mixtures.bin"
 
 	err := db.ToProtobuf(
 		"mixtures",

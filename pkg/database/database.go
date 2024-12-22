@@ -11,31 +11,36 @@ import (
 )
 
 type Database struct {
-	dbName string
-	schema string
-	db     *sql.DB
-	lock   sync.Mutex
+	dbName              string
+	schema              string
+	db                  *sql.DB
+	lock                sync.Mutex
+	NeedsInitialization bool
 }
 
 func NewDatabase(dbName string, schema []byte) *Database {
-	if _, err := os.Stat(dbName); err == nil {
-		os.Remove(dbName)
+	database := &Database{
+		dbName:              dbName,
+		schema:              string(schema),
+		NeedsInitialization: false,
 	}
 
-	db, err := sql.Open("sqlite3", dbName)
+	_, err := os.Stat(dbName)
+	if err != nil {
+		database.NeedsInitialization = true
+	}
+
+	database.db, err = sql.Open("sqlite3", database.dbName)
 	if err != nil {
 		log.Fatalf("Failed to open SQLite database: %v", err)
 	}
-	_, err = db.Exec(string(schema))
+
+	_, err = database.db.Exec(database.schema)
 	if err != nil {
 		log.Fatalf("Failed to initialize database schema: %v", err)
 	}
 
-	return &Database{
-		dbName: dbName,
-		schema: string(schema),
-		db:     db,
-	}
+	return database
 }
 
 func (cdb *Database) Close() error {

@@ -27,6 +27,17 @@
     width: 100%;
   }
 
+  .info-icon {
+    background: none; 
+    border: none; 
+    padding: 0; 
+    cursor: pointer"
+  }
+
+  .help-text {
+    display: none;
+  }
+
   .div1 {
     grid-area: 1 / 1 / 2 / 3;
   }

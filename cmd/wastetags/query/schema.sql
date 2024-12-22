@@ -1,4 +1,4 @@
-PRAGMA foreign_keys = ON; 
+PRAGMA foreign_keys = ON;
 
 CREATE TABLE IF NOT EXISTS chemicals (
     cas TEXT PRIMARY KEY,
@@ -11,8 +11,8 @@ CREATE TABLE IF NOT EXISTS mixtures (
     component_name TEXT NOT NULL,
     cas TEXT NOT NULL,
     percent TEXT NOT NULL,
-    component_order INTEGER,
-    FOREIGN KEY (cas) REFERENCES chemicals (cas) ON DELETE CASCADE
+    FOREIGN KEY (cas) REFERENCES chemicals (cas) ON DELETE CASCADE,
+    UNIQUE (chem_name, cas)
 );
 
 CREATE TABLE IF NOT EXISTS locations (
@@ -28,7 +28,8 @@ CREATE TABLE IF NOT EXISTS containers (
             WHEN abbreviation IS NOT NULL AND abbreviation != '' THEN abbreviation || ' ' || name
             ELSE name
         END
-    ) VIRTUAL
+    ) VIRTUAL,
+    UNIQUE (name, abbreviation)
 );
 
 CREATE TABLE IF NOT EXISTS units (
@@ -40,7 +41,8 @@ CREATE TABLE IF NOT EXISTS units (
             WHEN abbreviation IS NOT NULL AND abbreviation != '' THEN abbreviation || ' ' || name
             ELSE name
         END
-    ) VIRTUAL
+    ) VIRTUAL,
+    UNIQUE (name, abbreviation)
 );
 
 CREATE TABLE IF NOT EXISTS states (

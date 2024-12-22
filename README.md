@@ -80,7 +80,7 @@ From here, you can:
 ## Customization & Configuration
 
 - **Port**: The application runs by default on port `:8080`. Modify the `r.Run(":8080")` line in `runLabelMaker()` to change the port.
-- **Database Path**: The SQLite database defaults to `data/chemicals.sqlite3`. Modify the `init()` function in the code to point to a different database file if desired.
+- **Database Path**: The SQLite database defaults to `build/wastetags.sqlite3`. Modify the `init()` function in the code to point to a different database file if desired.
 
 ## Troubleshooting
 

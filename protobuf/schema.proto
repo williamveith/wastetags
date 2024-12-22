@@ -19,7 +19,6 @@ message Mixture {
     string component_name = 2 [json_name = "component_name"];
     string cas = 3 [json_name = "cas"];
     string percent = 4 [json_name = "percent"];
-    int32 component_order = 5 [json_name = "component_order"];
 }
 
 message MixtureList {

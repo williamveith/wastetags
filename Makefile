@@ -6,7 +6,7 @@ BUILD_LOG_DIR := $(BINARY_ROOT_DIR)/logs
 BINARY_NAME := wastetags
 DOCKER_IMAGE := $(BINARY_NAME):latest
 DOCKERFILE := $(BUILD_DIR)/Dockerfile
-DATA_FILE := data/chemicals.sqlite3
+DATA_FILE := build/wastetags.sqlite3
 USER := pi.local
 
 # Go binary metadata
@@ -42,7 +42,7 @@ push-linux: clean linux
 	@scp -r $(BINARY_DIR) $(USER):/tmp/$(BUILD_TYPE)
 	@scp $(DATA_FILE) $(USER):/tmp/$(BUILD_TYPE)
 	@ssh $(USER) 'sudo mv /tmp/linux/wastetags /usr/local/bin/ && \
-	sudo mv /tmp/linux/chemicals.sqlite3 /var/lib/wastetags/ && \
+	sudo mv /tmp/linux/wastetags.sqlite3 /var/lib/wastetags/ && \
 	sudo rm -rf /tmp/linux && \
 	sudo systemctl restart wastetags'
 	@echo "Push complete. Files moved to final destinations on remote server."

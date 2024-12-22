@@ -11,7 +11,12 @@
   <body>
     {{ template "component-navbar.html" . }}
     <h1>Generate Waste Label</h1>
-    <form class="parent" action="/waste-tag" method="POST" autocomplete="off">
+    <form
+      id="wasteTagForm"
+      class="parent"
+      action="/waste-tag"
+      method="POST"
+      autocomplete="off">
       <div class="div1">
         <label for="location">Location:</label>
         <select id="location" name="location" required>
@@ -33,7 +38,15 @@
       </div>
 
       <div class="div3">
-        <label for="count">Number of Containers</label>
+        <label for="count"
+          >Number of Containers
+          <button type="button" id="numberOfContainersInfo" class="info-icon">
+            &#9432;
+            <pre class="help-text">Enter 1 unless otherwise told.
+You will have the option on the next page to generate additional Waste Tags if you are tagging multiple containers of the same waste.
+            </pre>
+          </button>
+        </label>
         <input
           type="text"
           id="count"
@@ -55,12 +68,19 @@
       </div>
 
       <div class="div5">
-        <label for="contSize">Container Size</label>
+        <label for="contSize">Container Size
+          <button type="button" id="sizeOfContainerInfo" class="info-icon">
+            &#9432;
+            <pre class="help-text">The physical size of the container.
+Ex. If you are filling a 1 gallon bottle, the size would be 1 and the units for the container size would be G GALLONS
+            </pre>
+          </button>
+        </label>
         <input
           type="text"
           id="contSize"
           name="contSize"
-          pattern="^\d+\.\d{2}$"
+          pattern="^\d*\.?\d{1,2}$"
           required />
       </div>
 
@@ -75,12 +95,19 @@
       </div>
 
       <div class="div7">
-        <label for="quantity">Quantity of Waste</label>
+        <label for="quantity">Quantity of Waste
+          <button type="button" id="quantityOfWasteInfo" class="info-icon">
+            &#9432;
+            <pre class="help-text">Liquids: Same units and value entered in Container Size.
+Solids: Weight of the waste. The Units for Quantity of Waste will be grams, pounds, etc
+            </pre>
+          </button>
+        </label>
         <input
           type="text"
           id="quantity"
           name="quantity"
-          pattern="^\d+\.\d{2}$"
+          pattern="^\d*\.?\d{1,2}$"
           required />
       </div>
 
@@ -122,6 +149,17 @@
         .getElementById("quantity")
         .addEventListener("input", upToTwoDecimals);
     </script>
+    <script type="module">
+      import { setDecimalPlaces } from "/static/js/preprocessing.js";
+      document
+        .getElementById("wasteTagForm")
+        .addEventListener("submit", function () {
+          setDecimalPlaces(document.getElementById("contSize"), 2);
+          setDecimalPlaces(document.getElementById("quantity"), 2);
+          setDecimalPlaces(document.getElementById("count", 0));
+        });
+    </script>
     <script src="/static/js/arrow-navigation.js"></script>
+    <script src="/static/js/help-menus.js"></script>
   </body>
 </html>
