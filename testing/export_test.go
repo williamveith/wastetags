@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/williamveith/wastetags/pkg/database"
-	"google.golang.org/protobuf/proto"
 )
 
 func TestToProtobuf(t *testing.T) {
@@ -18,32 +17,6 @@ func TestToProtobuf(t *testing.T) {
 
 	sqlStatement, _ := os.ReadFile("/Users/main/Projects/Go/wastetags/cmd/wastetags/query/schema.sql")
 	db := database.NewDatabase(cfg.DatabasePath, sqlStatement)
-
 	defer db.Close()
-
-	// Run the ToProtobuf function
-	outputFile := "/Users/main/Projects/Go/wastetags/cmd/wastetags/data/mixtures.bin"
-
-	err := db.ToProtobuf(
-		"mixtures",
-		&database.Mixture{},
-		&database.MixtureList{},
-		outputFile,
-	)
-
-	if err != nil {
-		t.Fatalf("ToProtobuf failed: %v", err)
-	}
-
-	// Read and unmarshal the Protobuf file
-	data, err := os.ReadFile(outputFile)
-	if err != nil {
-		t.Fatalf("Failed to read Protobuf output file: %v", err)
-	}
-
-	var result database.ChemicalList
-	err = proto.Unmarshal(data, &result)
-	if err != nil {
-		t.Fatalf("Failed to unmarshal Protobuf data: %v", err)
-	}
+	db.ExportToProtobuf()
 }

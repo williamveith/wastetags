@@ -101,10 +101,11 @@ func MakeWasteTag(c *gin.Context) (string, gin.H) {
 	}
 
 	wasteTag := idGenerator()
+
 	sqlStatement := readEmbeddedFile("query/get_rows_by_col_value.sql")
 	components, err := db.GetRowsByColumnValue("mixtures", sqlStatement, "chem_name", values["chemName"])
 	if err != nil {
-		fmt.Println("Error retrieving components:", err)
+		fmt.Println("Error retrieving display components:", err)
 		c.HTML(http.StatusInternalServerError, "error.html", gin.H{"message": "Internal Server Error"})
 		return "error.html", genericErrorMessage
 	}
@@ -117,11 +118,29 @@ func MakeWasteTag(c *gin.Context) (string, gin.H) {
 		}
 	}
 
+	qrcodeComponents, err := db.GetRowsByColumnValue("mixtures_internal_names", sqlStatement, "chem_display_name", values["chemName"])
+	if err != nil {
+		fmt.Println("Error retrieving internal components:", err)
+		c.HTML(http.StatusInternalServerError, "error.html", gin.H{"message": "Internal Server Error"})
+		return "error.html", genericErrorMessage
+	}
+
+	qrcodeComponentsData := make([]Component, len(qrcodeComponents))
+	for i, component := range qrcodeComponents {
+		if i == 0 {
+			values["chemName"] = fmt.Sprint(component["chem_internal_name"])
+		}
+		qrcodeComponentsData[i] = Component{
+			Chemical:   fmt.Sprint(component["component_internal_name"]),
+			Percentage: fmt.Sprint(component["percent"]),
+		}
+	}
+
 	qrCodeData := &QRCodeData{
 		Version:    "v1",
 		WasteTags:  []string{wasteTag},
 		Values:     values,
-		Components: componentData,
+		Components: qrcodeComponentsData,
 	}
 
 	qrCodeBase64, jsonContent := qrCodeData.generateDataUri()

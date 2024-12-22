@@ -190,6 +190,7 @@ func (cdb *Database) ImportFromProtobuff(embeddedData fs.FS) {
 		message     proto.Message
 		listMessage proto.Message
 	}{
+		{"alias", &Alias{}, &AliasList{}},
 		{"chemicals", &Chemical{}, &ChemicalList{}},
 		{"mixtures", &Mixture{}, &MixtureList{}},
 		{"locations", &Location{}, &LocationList{}},

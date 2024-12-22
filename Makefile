@@ -9,10 +9,9 @@ DOCKERFILE := $(BUILD_DIR)/Dockerfile
 DATA_FILE := build/wastetags.sqlite3
 USER := pi.local
 
-# Go binary metadata
-VERSION := $(git describe --tags --abbrev=0)
-BUILDTIME := "$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
-COMMITHASH := $(git rev-parse HEAD)
+# Proto files
+PROTO_DIR = protobuf
+PROTO_FILES = $(wildcard $(PROTO_DIR)/*.proto)
 
 # Default target
 all: linux
@@ -87,6 +86,9 @@ run-dev: BUILD_TYPE := dev
 run-dev:
 	@echo "Running $(BUILD_TYPE) build..."
 	@$(BINARY_ROOT_DIR)/$(BUILD_TYPE)/$(BINARY_NAME) --$(BUILD_TYPE)
+
+proto:
+	@protoc --go_out=. $(PROTO_FILES)
 
 # Clean build artifacts
 clean:

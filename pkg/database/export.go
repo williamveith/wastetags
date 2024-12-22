@@ -105,6 +105,7 @@ func (cdb *Database) ExportToProtobuf() {
 		listMessage proto.Message
 	}{
 		{"mixtures", &Mixture{}, &MixtureList{}},
+		{"alias", &Alias{}, &AliasList{}},
 		{"chemicals", &Chemical{}, &ChemicalList{}},
 		{"locations", &Location{}, &LocationList{}},
 		{"containers", &Container{}, &ContainerList{}},
