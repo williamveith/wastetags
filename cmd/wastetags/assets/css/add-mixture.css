@@ -1,0 +1,46 @@
+.grid-1,
+.grid-2,
+.grid-3 {
+    display: grid;
+    align-items: center;
+    grid-auto-rows: minmax(20, auto);
+    gap: 10px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.grid-1 {
+    grid-template-columns: repeat(1, 1fr);
+}
+
+.grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+input.component_name {
+    width: 98%;
+}
+
+input[name="cas1"] {
+    width: 40%;
+}
+
+input[name="cas2"] {
+    width: 9%;
+}
+
+input[name="cas3"] {
+    width: 4%;
+}
+
+input.percentage {
+    width: 98%;
+}
+
+.row-button{
+    width: 30%;
+}

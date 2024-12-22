@@ -29,12 +29,13 @@
 
       <div class="div2">
         <label for="chemName">Chemical Name</label>
-        <select id="chemName" name="chemName" required>
+        <input list="chemName-list" id="chemName" name="chemName" />
+        <datalist id="chemName-list" required>
           <option disabled selected value>-- select chemical name --</option>
           {{ range .Components }}
           <option value="{{ .chem_name }}">{{ .chem_name }}</option>
           {{ end }}
-        </select>
+        </datalist>
       </div>
 
       <div class="div3">
@@ -42,7 +43,8 @@
           >Number of Containers
           <button type="button" id="numberOfContainersInfo" class="info-icon">
             &#9432;
-            <pre class="help-text">Enter 1 unless otherwise told.
+            <pre class="help-text">
+Enter 1 unless otherwise told.
 You will have the option on the next page to generate additional Waste Tags if you are tagging multiple containers of the same waste.
             </pre>
           </button>
@@ -68,10 +70,12 @@ You will have the option on the next page to generate additional Waste Tags if y
       </div>
 
       <div class="div5">
-        <label for="contSize">Container Size
+        <label for="contSize"
+          >Container Size
           <button type="button" id="sizeOfContainerInfo" class="info-icon">
             &#9432;
-            <pre class="help-text">The physical size of the container.
+            <pre class="help-text">
+The physical size of the container.
 Ex. If you are filling a 1 gallon bottle, the size would be 1 and the units for the container size would be G GALLONS
             </pre>
           </button>
@@ -95,10 +99,12 @@ Ex. If you are filling a 1 gallon bottle, the size would be 1 and the units for 
       </div>
 
       <div class="div7">
-        <label for="quantity">Quantity of Waste
+        <label for="quantity"
+          >Quantity of Waste
           <button type="button" id="quantityOfWasteInfo" class="info-icon">
             &#9432;
-            <pre class="help-text">Liquids: Same units and value entered in Container Size.
+            <pre class="help-text">
+Liquids: Same units and value entered in Container Size.
 Solids: Weight of the waste. The Units for Quantity of Waste will be grams, pounds, etc
             </pre>
           </button>
@@ -161,5 +167,26 @@ Solids: Weight of the waste. The Units for Quantity of Waste will be grams, poun
     </script>
     <script src="/static/js/arrow-navigation.js"></script>
     <script src="/static/js/help-menus.js"></script>
+    <script type="module">
+      import Fuse from 'https://cdn.jsdelivr.net/npm/fuse.js@6.6.2/dist/fuse.esm.js';
+  
+      const fuseOptions = {
+          keys: ['chem_name'],
+          threshold: 0.3,
+          includeScore: true,
+      };
+      const components = {{ .Components }};
+  
+      const fuse = new Fuse(components, fuseOptions);
+  
+      document.addEventListener("DOMContentLoaded", () => {
+          const inputElement = document.getElementById("chemName");
+  
+          inputElement.addEventListener("input", (event) => {
+              const results = fuse.search(event.target.value);
+              console.log(results);
+          });
+      });
+  </script>  
   </body>
 </html>

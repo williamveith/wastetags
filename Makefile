@@ -13,8 +13,7 @@ USER := pi.local
 PROTO_DIR = protobuf
 PROTO_FILES = $(wildcard $(PROTO_DIR)/*.proto)
 
-# Default target
-all: linux
+all: clean dev run-dev
 
 # Build for Linux
 linux: BUILD_TYPE := linux

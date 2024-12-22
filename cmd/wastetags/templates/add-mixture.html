@@ -11,10 +11,108 @@
   <body>
     {{ template "component-navbar.html" . }}
     <h1>Add New Mixture</h1>
-    <h2>
-      Still needs to be developed
-    </h2>
+    <form
+      id="addMixtureForm"
+      action="/add-mixture"
+      method="POST"
+      autocomplete="off">
+      <div class="grid-1">
+        <div class="div1">
+          <label for="chem_name">Mixture Name</label>
+          <input
+            id="chem_name"
+            type="text"
+            name="chem_name"
+            class="chem_name"
+            required />
+        </div>
+      </div>
+      <div class="grid-3">
+        <div class="div2 header">Component Name</div>
+        <div class="div3 header">CAS Number</div>
+        <div class="div4 header">Percentage</div>
+        <div class="div5">
+          <input
+            type="text"
+            name="component_name"
+            class="component_name"
+            required />
+        </div>
+        <div class="div6 casNumber">
+          <input
+            name="cas1"
+            class="cas"
+            type="text"
+            pattern="[0-9]{2,7}"
+            size="7"
+            minlength="2"
+            maxlength="7"
+            required />
+          <span> &hyphen; </span>
+          <input
+            name="cas2"
+            class="cas"
+            type="text"
+            pattern="[0-9]{2}"
+            size="2"
+            minlength="2"
+            maxlength="2"
+            required />
+          <span> &hyphen; </span>
+          <input
+            name="cas3"
+            class="cas"
+            type="text"
+            pattern="[0-9]{1}"
+            size="1"
+            minlength="1"
+            maxlength="1"
+            required />
+        </div>
+        <div class="div7">
+          <input
+            type="text"
+            name="percentage"
+            class="percentage"
+            pattern="^\d*\.?\d{1,2}$"
+            required />
+        </div>
+      </div>
+      <div class="grid-3">
+        <div>
+          <button id="addRow" class="row-button" type="button">Add Row</button>
+          <button id="removeRow" class="row-button" type="button">
+            Remove Row
+          </button>
+        </div>
+      </div>
+      <div class="grid-3">
+        <div>
+          <button type="submit">Add New Mixture</button>
+        </div>
+      </div>
+    </form>
     {{ template "component-footer.html" . }}
     <script src="/static/js/arrow-navigation.js"></script>
+    <script>
+      document.getElementById("addRow").addEventListener("click", () => {
+        const parent = document.querySelector(".grid-3");
+        [".div5", ".div6", ".div7"].forEach((className) => {
+          const newElement = document.querySelector(className).cloneNode(true);
+          newElement
+            .querySelectorAll("input")
+            .forEach((input) => (input.value = ""));
+          parent.appendChild(newElement);
+        });
+      });
+
+      document.getElementById("removeRow").addEventListener("click", () => {
+        if (document.querySelectorAll(".div5").length > 1) {
+          [".div5", ".div6", ".div7"].forEach((className) => {
+            document.querySelector(className).remove();
+          });
+        }
+      });
+    </script>
   </body>
 </html>
