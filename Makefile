@@ -83,7 +83,7 @@ run-mac:
 
 run-dev: BUILD_TYPE := dev
 run-dev:
-	@echo "Running $(BUILD_TYPE) build..."
+	@echo "Running $(BUILD_TYPE) build at http://localhost:8080"
 	@$(BINARY_ROOT_DIR)/$(BUILD_TYPE)/$(BINARY_NAME) --$(BUILD_TYPE)
 
 proto:

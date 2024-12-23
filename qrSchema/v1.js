@@ -1,6 +1,6 @@
 const config = {
     topFields: [
-        { jsonKey: "wasteTags", targetId: "CS_WASTE__REQUESTITEM__ITEMID", action: "pop" },
+        { jsonKey: "wasteTag", targetId: "CS_WASTE__REQUESTITEM__ITEMID" },
         { jsonKey: "chemName", targetId: "CS_WASTE__REQUESTITEM__NAME1" },
         { jsonKey: "location", targetId: "CS_WASTE__REQUESTITEM__LNAME" },
         { jsonKey: "contCount", targetId: "CS_WASTE__REQUESTITEM__CONTCOUNT" },

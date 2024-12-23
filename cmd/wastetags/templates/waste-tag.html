@@ -6,6 +6,18 @@
     <link rel="stylesheet" href="/static/css/waste-tag.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Waste Label Maker</title>
+    <script>
+      window.CopyQRCode2Clipboard = (item) => {
+        navigator.clipboard
+          .writeText(item)
+          .then(() => {
+            alert("QR Code value copied to clipboard");
+          })
+          .catch((err) => {
+            console.error("Failed to copy QR Code value: ", err);
+          });
+      };
+    </script>
   </head>
   <body>
     {{ template "component-navbar.html" . }}
@@ -16,8 +28,15 @@
     </div>
     <div class="label">
       <div class="qr-code">
-        <img id="qrCodeDataUri" src="{{.QrCodeBase64}}" alt="QR Code" />
-        <input type="hidden" id="qrCodeValue" value="{{ .QRCodeValue }}" />
+        <img
+          id="qrCodeDataUri"
+          src="{{.QrCodeBase64}}"
+          alt="{{ .QRCodeValue }}" />
+        <input
+          type="hidden"
+          id="qrCodeValue"
+          class="qrcode-value"
+          value="{{ .QRCodeValue }}" />
       </div>
       <div class="title">WASTE</div>
       <div class="details">
@@ -51,11 +70,47 @@
         .getElementById("numberOfCopies")
         .addEventListener("input", numberOfCopies);
     </script>
+    <!-- Your existing snippet (unchanged) -->
     <script type="module">
-      import { onlyNumbersAllowed } from "/static/js/input-validators.js";
+      import { numberOfCopies } from "/static/js/qr-code-api.js";
       document
         .getElementById("numberOfCopies")
-        .addEventListener("input", onlyNumbersAllowed);
+        .addEventListener("input", numberOfCopies);
+    </script>
+    <script type="module">
+      (async () => {
+        const module = await import("/static/js/qr-code-api.js");
+        const originalNumberOfCopies = module.numberOfCopies;
+
+        function afterNumberOfCopies() {
+          Array.from(document.getElementsByTagName("img")).forEach((item) => {
+            if (!item.__hasClickListener) {
+              item.__hasClickListener = true;
+              item.addEventListener("click", function () {
+                CopyQRCode2Clipboard(item.getAttribute("alt"));
+              });
+            }
+          });
+        }
+
+        const patchedNumberOfCopies = async function (event) {
+          await originalNumberOfCopies(event);
+          afterNumberOfCopies();
+        };
+
+        const inputEl = document.getElementById("numberOfCopies");
+        inputEl.removeEventListener("input", originalNumberOfCopies);
+        inputEl.addEventListener("input", patchedNumberOfCopies);
+      })();
+    </script>
+
+    <script>
+      Array.from(document.getElementsByTagName("img")).forEach((item) =>
+        item.addEventListener("click", function () {
+          item.__hasClickListener = true;
+          CopyQRCode2Clipboard(item.getAttribute("alt"));
+        })
+      );
     </script>
     <script src="/static/js/arrow-navigation.js"></script>
   </body>

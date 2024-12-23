@@ -26,7 +26,7 @@ type Component struct {
 
 type QRCodeData struct {
 	Version    string            `json:"version"`
-	WasteTags  []string          `json:"name"`
+	WasteTag   string            `json:"name"`
 	Values     map[string]string `json:"values"`
 	Components []Component       `json:"components"`
 }
@@ -39,9 +39,9 @@ func (qrCodeData *QRCodeData) generateDataUri() (string, string) {
 }
 
 func (qrCodeData *QRCodeData) makeCopy() (string, string, string) {
-	qrCodeData.WasteTags[0] = idGenerator()
+	qrCodeData.WasteTag = idGenerator()
 	dataURI, jsonContent := qrCodeData.generateDataUri()
-	return dataURI, jsonContent, qrCodeData.WasteTags[0]
+	return dataURI, jsonContent, qrCodeData.WasteTag
 }
 
 func convertMapToQRCodeData(dataMap map[string]interface{}) (*QRCodeData, error) {
@@ -138,7 +138,7 @@ func MakeWasteTag(c *gin.Context) (string, gin.H) {
 
 	qrCodeData := &QRCodeData{
 		Version:    "v1",
-		WasteTags:  []string{wasteTag},
+		WasteTag:   wasteTag,
 		Values:     values,
 		Components: qrcodeComponentsData,
 	}
