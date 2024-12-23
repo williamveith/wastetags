@@ -1,5 +1,6 @@
 -- Enable foreign key constraints to enforce relationships between tables
 PRAGMA foreign_keys = ON;
+PRAGMA journal_mode=WAL;
 
 -- Create a table to store chemicals with a unique CAS identifier and chemical name
 CREATE TABLE IF NOT EXISTS chemicals (

@@ -96,6 +96,13 @@ clean:
 	@rm -rf $(BUILD_LOG_DIR)
 	@echo "Clean complete."
 
+mega-git:
+	@cp -rf cmd/wastetags/data ~/Projects/MegaGithub/wastetags/
+	@git --git-dir=$$HOME/Projects/MegaGithub/wastetags/.git --work-tree=$$HOME/Projects/MegaGithub/wastetags add .
+	@git --git-dir=$$HOME/Projects/MegaGithub/wastetags/.git --work-tree=$$HOME/Projects/MegaGithub/wastetags commit -m "Data update"
+	@mega-put /Users/main/Projects/MegaGithub/wastetags/.git /github/wastetags/.git
+
+
 # Help command to display available targets
 help:
 	@echo "\n"

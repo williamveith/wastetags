@@ -4,6 +4,7 @@ import (
 	"embed"
 	"encoding/json"
 	"flag"
+	"fmt"
 	"html/template"
 	"io/fs"
 	"log"
@@ -11,7 +12,9 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"time"
 
+	"github.com/gin-contrib/gzip"
 	"github.com/williamveith/wastetags/pkg/database"
 	"github.com/williamveith/wastetags/pkg/errors"
 	"github.com/williamveith/wastetags/pkg/idgen"
@@ -82,6 +85,14 @@ func pageHandler(handler func(c *gin.Context) (string, gin.H)) gin.HandlerFunc {
 	}
 }
 
+func CacheMiddleware(duration time.Duration) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Writer.Header().Set("Cache-Control", "public, max-age="+fmt.Sprint(int(duration.Seconds())))
+		c.Writer.Header().Set("Expires", time.Now().Add(duration).Format(http.TimeFormat))
+		c.Next()
+	}
+}
+
 func addCurrentPathMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Set("CurrentPath", c.Request.URL.Path)
@@ -106,14 +117,17 @@ func main() {
 	// Engine
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
+	r.Use(gzip.Gzip(gzip.DefaultCompression))
 
 	// Embedded Assets
 	tmpl, _ := template.ParseFS(embeddedFS, "templates/*.html")
 	r.SetHTMLTemplate(tmpl)
-	staticFS := errors.Must(fs.Sub(embeddedFS, "assets"))
-	r.StaticFS("/static", http.FS(staticFS))
 
 	// Middleware
+	staticFS := errors.Must(fs.Sub(embeddedFS, "assets"))
+	r.GET("/static/*filepath", CacheMiddleware(24*time.Hour), func(c *gin.Context) {
+		c.FileFromFS(c.Param("filepath"), http.FS(staticFS))
+	})
 	r.Use(addCurrentPathMiddleware())
 
 	// Redirects

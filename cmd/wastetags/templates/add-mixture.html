@@ -114,5 +114,26 @@
         }
       });
     </script>
+    <script type="module">
+      import Fuse from 'https://cdn.jsdelivr.net/npm/fuse.js@6.6.2/dist/fuse.esm.js';
+  
+      const fuseOptions = {
+          keys: ['chem_name'],
+          threshold: 0.3,
+          includeScore: true,
+      };
+      const components = {{ .Components }};
+  
+      const fuse = new Fuse(components, fuseOptions);
+  
+      document.addEventListener("DOMContentLoaded", () => {
+          const inputElement = document.getElementById("chemName");
+  
+          inputElement.addEventListener("input", (event) => {
+              const results = fuse.search(event.target.value);
+              console.log(results);
+          });
+      });
+  </script>  
   </body>
 </html>

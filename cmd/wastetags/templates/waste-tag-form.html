@@ -5,6 +5,10 @@
     <link rel="icon" href="/static/images/favicon.png" />
     <link rel="stylesheet" href="/static/css/waste-tag-form.css" />
     <link rel="stylesheet" href="/static/css/general.css" />
+    <link rel="preload" href="/static/js/arrow-navigation.js" as="script" />
+    <link rel="preload" href="/static/js/help-menus.js" as="script" />
+    <script src="/static/js/arrow-navigation.js" defer></script>
+    <script src="/static/js/help-menus.js" defer></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Waste Label Maker</title>
   </head>
@@ -165,28 +169,5 @@ Solids: Weight of the waste. The Units for Quantity of Waste will be grams, poun
           setDecimalPlaces(document.getElementById("count", 0));
         });
     </script>
-    <script src="/static/js/arrow-navigation.js"></script>
-    <script src="/static/js/help-menus.js"></script>
-    <script type="module">
-      import Fuse from 'https://cdn.jsdelivr.net/npm/fuse.js@6.6.2/dist/fuse.esm.js';
-  
-      const fuseOptions = {
-          keys: ['chem_name'],
-          threshold: 0.3,
-          includeScore: true,
-      };
-      const components = {{ .Components }};
-  
-      const fuse = new Fuse(components, fuseOptions);
-  
-      document.addEventListener("DOMContentLoaded", () => {
-          const inputElement = document.getElementById("chemName");
-  
-          inputElement.addEventListener("input", (event) => {
-              const results = fuse.search(event.target.value);
-              console.log(results);
-          });
-      });
-  </script>  
   </body>
 </html>
