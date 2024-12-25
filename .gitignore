@@ -1,6 +1,7 @@
 .*
 *.sqlite3*
 !.gitignore
+!.github
 bin/*
 setup/*
 dist/
