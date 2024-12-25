@@ -7,12 +7,8 @@
         "pattern": "^v[0-9]+$"
       },
       "name": {
-        "type": "array",
-        "items": {
-          "type": "string",
-          "pattern": "^[0-9a-zA-Z]{20}$"
-        },
-        "minItems": 1
+        "type": "string",
+        "pattern": "^[0-9a-zA-Z]{20}$"
       },
       "values": {
         "type": "object",

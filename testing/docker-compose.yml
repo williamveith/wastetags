@@ -1,0 +1,36 @@
+services:
+  minifyjs:
+    build:
+      context: .
+      dockerfile: build/tools/MinifyJS.Dockerfile
+    image: minifyjs:latest
+    volumes:
+      - ./cmd/wastetags/assets/js:/app/input:ro
+      - ./dist/wastetags/assets/js:/app/output:rw
+
+  minifycss:
+    build:
+      context: .
+      dockerfile: build/tools/MinifyCSS.Dockerfile
+    image: minifycss:latest
+    volumes:
+      - ./cmd/wastetags/assets/css:/app/input:ro
+      - ./dist/wastetags/assets/css:/app/output:rw
+
+  linux:
+    build:
+      context: .
+      dockerfile: build/tools/CompileGo.Dockerfile
+      args:
+        TARGETOS: linux
+        TARGETARCH: arm64
+        TARGETVARIANT: v8
+    image: wastetags:latest
+    command: |
+      sh -c "cp /wastetags /export/"
+    volumes:
+      - ./bin/linux:/export
+
+volumes:
+  build_output:
+    driver: local
