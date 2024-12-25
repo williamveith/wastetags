@@ -2,7 +2,7 @@ services:
   minifyjs:
     build:
       context: .
-      dockerfile: build/MinifyJS.Dockerfile
+      dockerfile: build/tools/MinifyJS.Dockerfile
     image: minifyjs:latest
     volumes:
       - ./cmd/wastetags/assets/js:/app/input:ro
@@ -11,7 +11,7 @@ services:
   minifycss:
     build:
       context: .
-      dockerfile: build/MinifyCSS.Dockerfile
+      dockerfile: build/tools/MinifyCSS.Dockerfile
     image: minifycss:latest
     volumes:
       - ./cmd/wastetags/assets/css:/app/input:ro
@@ -20,7 +20,7 @@ services:
   linux:
     build:
       context: .
-      dockerfile: build/CompileGo.Dockerfile
+      dockerfile: build/tools/CompileGo.Dockerfile
       args:
         TARGETOS: linux
         TARGETARCH: arm64

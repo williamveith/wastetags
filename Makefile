@@ -76,6 +76,19 @@ dev:
 	@go build -v -gcflags="all=-N -l" -x -ldflags="-s -w" -o $(BINARY_PATH) cmd/$(BINARY_NAME)/*.go > $(BUILD_LOG_DIR)/$(BUILD_TYPE).log 2>&1
 	@echo "$(BUILD_TYPE) build complete. Files located in $(BINARY_DIR)"
 
+# Build for dev
+mac-amd: BUILD_TYPE := darwin
+mac-amd: TARGET_ARCH := amd64
+mac-amd: TARGET_OS := darwin
+mac-amd: BINARY_DIR := $(BINARY_ROOT_DIR)/$(BUILD_TYPE)
+mac-amd: BINARY_PATH := $(BINARY_DIR)/$(BINARY_NAME)
+mac-amd:
+	@echo "Building for dev..."
+	@mkdir -p $(BINARY_DIR)
+	@mkdir -p $(BUILD_LOG_DIR)
+	@CGO_ENABLED=1 GOARCH=$(TARGET_ARCH) GOOS=$(TARGET_OS) go build -v -gcflags="all=-N -l" -x -ldflags="-s -w" -o $(BINARY_PATH) cmd/$(BINARY_NAME)/*.go > $(BUILD_LOG_DIR)/$(BUILD_TYPE).log 2>&1
+	@echo "$(BUILD_TYPE) build complete. Files located in $(BINARY_DIR)"
+
 # Run the application for a specific build
 run-linux: BUILD_TYPE := linux
 run-linux:

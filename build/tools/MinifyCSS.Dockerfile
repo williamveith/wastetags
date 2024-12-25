@@ -5,4 +5,8 @@ RUN npm install -g clean-css-cli@5.6.3
 
 WORKDIR /app
 
-ENTRYPOINT ["sh", "-c", "for file in ./input/*.css; do filename=$(basename \"$file\"); cleancss -o ./output/\"$filename\" \"$file\"; done"]
+COPY ./build/tools/minifycss.sh /app/minifycss.sh
+
+RUN chmod +x /app/minifycss.sh
+
+ENTRYPOINT ["/app/minifycss.sh"]
