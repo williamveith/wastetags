@@ -3,3 +3,4 @@
 !.gitignore
 bin/*
 setup/*
+dist/

@@ -5,7 +5,7 @@ BUILD_LOG_DIR := $(BINARY_ROOT_DIR)/logs
 
 BINARY_NAME := wastetags
 DOCKER_IMAGE := $(BINARY_NAME):latest
-DOCKERFILE := $(BUILD_DIR)/Dockerfile
+ DOCKERFILE := $(BUILD_DIR)/CompileGo.Dockerfile
 DATA_FILE := build/wastetags.sqlite3
 USER := pi.local
 
@@ -14,6 +14,20 @@ PROTO_DIR = protobuf
 PROTO_FILES = $(wildcard $(PROTO_DIR)/*.proto)
 
 all: clean dev run-dev
+
+mini: MINIFY_IMAGE := minify:latest
+mini: DOCKER_FILE := $(BUILD_DIR)/Minify.Dockerfile
+mini: MIN_DIR := dist/wastetags/assets/js
+mini:
+	@echo "Building minified JS..."
+	@docker build \
+		-t $(MINIFY_IMAGE) \
+		-f $(DOCKER_FILE) .
+	@mkdir -p $(MIN_DIR)
+	@docker run --rm \
+		-v $$(pwd)/$(MIN_DIR):/export $(MINIFY_IMAGE) \
+		cp *.min.js /export/
+	@echo "Minified JS files copied to $(MIN_DIR)"
 
 # Build for Linux
 linux: BUILD_TYPE := linux
@@ -24,15 +38,7 @@ linux: BINARY_PATH := $(BINARY_DIR)/$(BINARY_NAME)
 linux:
 	@echo "Building for Linux..."
 	@mkdir -p $(BINARY_DIR)
-	@docker build \
-		--build-arg TARGETOS=$(BUILD_TYPE) \
-		--build-arg TARGETARCH=$(TARGET_ARCH) \
-		--build-arg TARGETVARIANT=$(TARGET_VARIANT) \
-		-t $(DOCKER_IMAGE) \
-		-f $(DOCKERFILE) .
-	@docker run --rm -v $$(pwd)/$(BINARY_DIR):/export $(DOCKER_IMAGE) cp /$(BINARY_NAME) /export/
-	@cp -r $(BUILD_DIR)/$(BUILD_TYPE)/* $(BINARY_DIR)/
-	@echo "$(BUILD_TYPE) build complete. Files located in $$(pwd)/$(BINARY_DIR)"
+	@docker compose up --build
 
 push-linux: BUILD_TYPE := linux
 push-linux: BINARY_DIR := $(BINARY_ROOT_DIR)/$(BUILD_TYPE)

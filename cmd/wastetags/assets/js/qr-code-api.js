@@ -1,5 +1,5 @@
 function updateQrCode(clonedLabel, newInfo) {
-    clonedImage = clonedLabel.querySelector("#qrCodeDataUri");
+    const clonedImage = clonedLabel.querySelector("#qrCodeDataUri");
     clonedImage.src = newInfo["dataURI"];
     clonedImage.setAttribute('alt', newInfo["jsonContent"]);
     clonedLabel.querySelector("#qrCodeValue").value =
