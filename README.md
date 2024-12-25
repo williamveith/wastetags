@@ -12,6 +12,7 @@ The Waste Tagging System is a web application designed to streamline the process
 6. [Routes & Handlers](#routes--handlers)
 7. [UI Overview](#ui-overview)
 8. [Usage Flow](#usage-flow)
+9. [Github Action](#github-action)
 
 ---
 
@@ -281,3 +282,20 @@ Below is a brief look at some core templates and their functions:
 2. **Add Mixtures**: Navigate to **Add Mixture** → Provide mixture components → Submit.  
 3. **Generate Tag**: Navigate to **Create Tag** → Fill out the form → Submit → The system fetches details (like chemical composition) from the DB → Renders a label with a QR code and relevant info.  
 4. **Print**: Choose the number of copies → Print directly from the browser.
+
+---
+
+## Github Action
+
+### **Creating new tags**
+
+```shell
+git tag -a [TAG] [Git Commit Hash] -m "Tag message"
+```
+
+To trigger the Github action to compile a binary for a specific tag run with your tag number replacing [TAG]:
+
+```shell
+echo '{"event_type": "update-binary", "client_payload": {"ref": "refs/tags/[TAG]"}}' | \
+gh api repos/williamveith/wastetags/dispatches --input -
+```
