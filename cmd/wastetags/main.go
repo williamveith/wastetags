@@ -115,7 +115,7 @@ func init() {
 
 func main() {
 	// Engine
-	gin.SetMode(gin.ReleaseMode)
+	gin.SetMode(gin.DebugMode)
 	r := gin.Default()
 	r.Use(gzip.Gzip(gzip.DefaultCompression))
 
@@ -144,6 +144,7 @@ func main() {
 
 	// API Routes
 	r.POST("/api/generate-qr-code", MakeNewQRCode)
+	r.POST("/api/get-cas", GetEntryByCas)
 
 	// Start HTTP Server
 	r.Run(":8080")

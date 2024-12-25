@@ -60,13 +60,44 @@
     </form>
     {{ template "component-footer.html" . }}
     <script type="module">
-      import { onlyNumberDigitsAllowed, casNumberValid } from "/static/js/input-validators.js";
-      document.querySelector("form").addEventListener("submit", (event) => {
-        if (!casNumberValid()) {
-          event.preventDefault();
+      import {
+        CasNumberValid,
+        CheckDatabaseForCas
+      } from "/static/js/cas-api.js";
+    
+      async function handleSubmit(event) {
+        event.preventDefault();
+    
+        const cas1 = document.getElementById("cas1").value.trim();
+        const cas2 = document.getElementById("cas2").value.trim();
+        const cas3 = document.getElementById("cas3").value.trim();
+    
+        // Validate the CAS number
+        const { isValid, casNumber } = await CasNumberValid(cas1, cas2, cas3, true);
+    
+        if (!isValid) {
+          alert("Invalid CAS Number. Please fix it to submit this form.");
+          return;
         }
-      });
+    
+        CheckDatabaseForCas(casNumber, document.getElementById("chemical-name").value.trim())
+          .then((message) => {
+            alert(JSON.stringify(message, null, 2));
+            if (message["ok"]) {
+              setTimeout(() => {
+                const form = event.target; // Reference to the form
+                form.removeEventListener("submit", handleSubmit); // Remove the event listener
+                form.submit(); // Submit the form
+              }, 100);
+            }
+          });
+      }
+    
+      document.querySelector("form").addEventListener("submit", handleSubmit);
+    </script>    
 
+    <script type="module">
+      import { onlyNumberDigitsAllowed } from "/static/js/input-validators.js";
       Array.from(document.getElementsByClassName("cas")).forEach(
         (element, index) => {
           element.addEventListener("input", onlyNumberDigitsAllowed);
