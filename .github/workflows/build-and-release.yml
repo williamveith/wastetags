@@ -29,13 +29,19 @@ jobs:
         with:
           go-version: '1.23.2'
 
-      # Step 4: Build the binary for ARM64
+      # Step 4: Install ARM64 GCC Toolchain
+      - name: Install ARM64 GCC Toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-aarch64-linux-gnu
+
+      # Step 5: Build the binary for ARM64
       - name: Build Binary
         run: |
           mkdir -p ./bin/linux-arm64
-          CGO_ENABLED=1 GOOS=linux GOARCH=arm64 go build -ldflags="-s -w" -o ./bin/linux-arm64/wastetags ./cmd/wastetags/*.go
+          CC=aarch64-linux-gnu-gcc CGO_ENABLED=1 GOOS=linux GOARCH=arm64 go build -ldflags="-s -w" -o ./bin/linux-arm64/wastetags ./cmd/wastetags/*.go
 
-      # Step 5: Create or Update GitHub Release
+      # Step 6: Create or Update GitHub Release
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
