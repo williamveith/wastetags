@@ -32,11 +32,13 @@
         <div class="div3 header">CAS Number</div>
         <div class="div4 header">Percentage</div>
         <div class="div5">
-          <input
-            type="text"
-            name="component_name"
-            class="component_name"
-            required />
+          <input list="component_name" id="chemName" name="chemName" />
+          <datalist id="component_name" required>
+            <option disabled selected value>-- select chemical name --</option>
+            {{ range .Components }}
+            <option value="{{ .Name }}">{{ .Name }}</option>
+            {{ end }}
+          </datalist>
         </div>
         <div class="div6 casNumber">
           <input
@@ -113,27 +115,34 @@
           });
         }
       });
+
+      function updateDatalist(items) {
+        const datalist = document.getElementById("component_name");
+        datalist.innerHTML = "";
+        items.forEach((item) => {
+          const option = document.createElement("option");
+          option.value = item.Name;
+          datalist.appendChild(option);
+        });
+      }
+
+      async function makePost(value) {
+        const response = await fetch("/api/chemical-name-search", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ query: value })
+        });
+        return response.json();
+      }
+
+      document
+        .getElementById("chemName")
+        .addEventListener("input", async (event) => {
+          result = await makePost(event.target.value);
+          updateDatalist(result);
+        });
     </script>
-    <script type="module">
-      import Fuse from 'https://cdn.jsdelivr.net/npm/fuse.js@6.6.2/dist/fuse.esm.js';
-  
-      const fuseOptions = {
-          keys: ['chem_name'],
-          threshold: 0.3,
-          includeScore: true,
-      };
-      const components = {{ .Components }};
-  
-      const fuse = new Fuse(components, fuseOptions);
-  
-      document.addEventListener("DOMContentLoaded", () => {
-          const inputElement = document.getElementById("chemName");
-  
-          inputElement.addEventListener("input", (event) => {
-              const results = fuse.search(event.target.value);
-              console.log(results);
-          });
-      });
-  </script>  
   </body>
 </html>

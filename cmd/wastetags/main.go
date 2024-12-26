@@ -105,6 +105,7 @@ func init() {
 	cfg = loadConfig()
 
 	// Initialize database
+
 	sqlStatement := readEmbeddedFile("query/schema.sql")
 	db = database.NewDatabase(cfg.DatabasePath, sqlStatement)
 	if db.NeedsInitialization {
@@ -145,7 +146,8 @@ func main() {
 	// API Routes
 	r.POST("/api/generate-qr-code", MakeNewQRCode)
 	r.POST("/api/get-cas", GetEntryByCas)
+	r.POST("/api/chemical-name-search", SearchForChemical)
 
 	// Start HTTP Server
-	r.Run(":8080")
+	r.Run(":8081")
 }

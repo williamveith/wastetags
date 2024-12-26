@@ -123,6 +123,25 @@ func (cdb *Database) GetRowsByColumnValue(tableName string, sqlStatement []byte,
 	return result, err
 }
 
+func (cdb *Database) GetAll(tableName string, sqlStatement []byte) ([]map[string]interface{}, error) {
+	cdb.lock.Lock()
+	defer cdb.lock.Unlock()
+
+	queryTemplate := string(sqlStatement)
+
+	query := fmt.Sprintf(queryTemplate, tableName)
+
+	rows, err := cdb.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	result, err := SqlRowsToArray(rows)
+
+	return result, err
+}
+
 func SqlRowsToArray(rows *sql.Rows) ([]map[string]interface{}, error) {
 	columns, err := rows.Columns()
 	if err != nil {
