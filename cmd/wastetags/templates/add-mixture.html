@@ -105,13 +105,20 @@
             .querySelectorAll("input")
             .forEach((input) => (input.value = ""));
           parent.appendChild(newElement);
+          if (className == ".div5") {
+            newElement.addEventListener("input", async (event) => {
+              result = await makePost(event.target.value);
+              updateDatalist(result);
+            });
+          }
+          newElement;
         });
       });
 
       document.getElementById("removeRow").addEventListener("click", () => {
         if (document.querySelectorAll(".div5").length > 1) {
           [".div5", ".div6", ".div7"].forEach((className) => {
-            document.querySelector(className).remove();
+            Array.from(document.querySelectorAll(className)).pop().remove();
           });
         }
       });
