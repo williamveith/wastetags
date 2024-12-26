@@ -121,6 +121,16 @@ mega-git:
 	@git --git-dir=$$HOME/Projects/MegaGithub/wastetags/.git --work-tree=$$HOME/Projects/MegaGithub/wastetags commit -m "Data update"
 	@mega-put /Users/main/Projects/MegaGithub/wastetags/.git /github/wastetags/.git
 
+release: TAG := v2.4.0
+release:
+	@git add .
+	@git commit -m "Repository Commit for Release $(TAG)"
+	@git push
+	@git tag -a $(TAG) $(shell git rev-parse HEAD) -m "Release for $(TAG)"
+	@git push origin $(TAG)
+	@echo '{"event_type": "update-binary", "client_payload": {"ref": "refs/tags/$(TAG)"}}' | \
+	gh api repos/williamveith/wastetags/dispatches --input -
+
 
 # Help command to display available targets
 help:

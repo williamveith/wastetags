@@ -1,4 +1,4 @@
-name: Build and Release for Raspberry Pi OS 64-bit
+name: Build & Release Version of WasteTag Binary
 
 on:
   repository_dispatch:
@@ -9,7 +9,8 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      TAG: "v2.3.0"
+      GOOS: "linux"
+      GOARCH: "arm64"
 
     steps:
       # Step 1: Checkout the repository
@@ -18,40 +19,59 @@ jobs:
         with:
           fetch-depth: 0  # Fetch all history for tags
 
-      # Step 2: Determine the latest tag
-      - name: Get Latest Tag
-        id: get-latest-tag
-        run: |
-          git fetch --tags
-          LATEST_TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
-          echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_ENV
-
-      # Step 3: Set up Go
+      # Step 2: Set up Go
       - name: Set Up Go
         uses: actions/setup-go@v4
         with:
           go-version: '1.23.2'
 
-      # Step 4: Install ARM64 GCC Toolchain
+      # Step 3: Install ARM64 GCC Toolchain (conditionally)
       - name: Install ARM64 GCC Toolchain
+        if: env.GOARCH == 'arm64'
         run: |
           sudo apt-get update
           sudo apt-get install -y gcc-aarch64-linux-gnu
 
-      # Step 5: Build the binary for ARM64
-      - name: Build Binary
+      # Step 4: Prepare Build Directory
+      - name: Prepare Build Directory
         run: |
-          mkdir -p ./bin/linux-arm64
-          CC=aarch64-linux-gnu-gcc CGO_ENABLED=1 GOOS=linux GOARCH=arm64 go build -ldflags="-s -w" -o ./bin/linux-arm64/wastetags ./cmd/wastetags/*.go
+          mkdir -p ./bin/${{ env.GOOS }}-${{ env.GOARCH }}
+          echo "Compiling for ${{ env.GOARCH }}..."
 
-      # Step 6: Create or Update GitHub Release
+      # Step 5: Build ARM64 binary
+      - name: Build Binary for ARM64
+        if: env.GOARCH == 'arm64'
+        run: |
+          CC=aarch64-linux-gnu-gcc \
+          CGO_ENABLED=1 \
+          GOOS=${{ env.GOOS }} \
+          GOARCH=${{ env.GOARCH }} \
+          go build -ldflags="-s -w" \
+                  -o ./bin/${{ env.GOOS }}-${{ env.GOARCH }}/wastetags \
+                  ./cmd/wastetags/*.go
+
+      # Step 6: Build AMD64 binary
+      - name: Build Binary for AMD64
+        if: env.GOARCH == 'amd64'
+        run: |
+          CGO_ENABLED=1 \
+          GOOS=${{ env.GOOS }} \
+          GOARCH=${{ env.GOARCH }} \
+          go build -ldflags="-s -w" \
+                  -o ./bin/${{ env.GOOS }}-${{ env.GOARCH }}/wastetags \
+                  ./cmd/wastetags/*.go
+
+      # Step 7: Create or Update GitHub Release
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
-          artifacts: ./bin/linux-arm64/wastetags
-          tag: ${{ env.TAG }}
-          name: ${{ env.TAG }}
-          body: "Automatically updated binary built for Raspberry Pi OS 64-bit (ARM64)."
+          artifacts: ./bin/${{ env.GOOS }}-${{ env.GOARCH }}/wastetags
+          tag: ${{ github.event.client_payload.ref }}
+          name: ${{ github.event.client_payload.ref }}
+          body: |
+            Automatically updated binary built for:
+            - OS: ${{ env.GOOS }}
+            - Architecture: ${{ env.GOARCH }}
           draft: false
           prerelease: false
           allowUpdates: true
